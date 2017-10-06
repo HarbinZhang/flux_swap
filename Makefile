@@ -18,8 +18,8 @@ hello: hello.c
 
 mpi_test: main.cpp
 	${MPICPP} -o main main.cpp
+	mpirun -n 2 ./main 4
 
-	./main $(N)
 
 git:
 	git add .

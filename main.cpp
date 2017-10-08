@@ -90,7 +90,7 @@ int main(int argc, char **argv){
 	}
 
 	// cout << matrix.size() << endl;
-	// printMatrix(matrix);
+	printMatrix(matrix);
 
 
 	MPI_Finalize();

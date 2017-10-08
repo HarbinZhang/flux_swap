@@ -45,7 +45,7 @@ int main(int argc, char **argv){
 	}
 
 
-	
+		
 
 	// iteration
 	int row_start = 0;
@@ -55,7 +55,7 @@ int main(int argc, char **argv){
 	int row_end = bandwidth;
 	if (rank == p - 1){
 		row_end = bandwidth - 1;
-	{
+	}
 	for(int k = 1; k < 10; k++){
 		for(int i = row_start; i < row_end; i++){
 			for(int j = 1; j < n - 1; j++){
@@ -63,6 +63,8 @@ int main(int argc, char **argv){
 			}
 		}
 	}
+
+	
 
 	// sum
 	long long sum = 0;
@@ -82,18 +84,18 @@ int main(int argc, char **argv){
 	}else{
 		MPI_Send(&sum, 1, MPI_LONG_LONG, 0, 1, MPI_COMM_WORLD);
 	}
-
+	
 
 	
-	long long mid = 0;
-	int mid_rank = n / 2;
+	long long mid = matrix[bandwidth/2][n/2];
+	int mid_rank = p / 2;
 
-	if(rank == 0){
+	if(rank == 0 && p != 1){
 		MPI_Recv(&mid, 1, MPI_LONG_LONG, mid_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	}else if(rank == mid_rank){
+	}else if(rank == mid_rank && p != 1){
 		MPI_Send(&matrix[0][n/2], 1, MPI_LONG_LONG, 0, 1, MPI_COMM_WORLD);
 	}
-
+	cout<<"hi"<<endl;
 
 	MPI_Barrier(MPI_COMM_WORLD);
 

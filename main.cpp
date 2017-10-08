@@ -52,10 +52,14 @@ int main(int argc, char **argv){
 	if (rank == 0){
 		row_start = 1;
 	}
+	int row_end = bandwidth;
+	if (rank == p - 1){
+		row_end = bandwidth - 1;
+	{
 	for(int k = 1; k < 10; k++){
-		for(int i = row_start; i < bandwidth; i++){
+		for(int i = row_start; i < row_end; i++){
 			for(int j = 1; j < n - 1; j++){
-				matrix[i][j] = f(matrix[i][j], matrix[i][j+1], matrix[i+1][j], matrix[i+1][j+1]);
+				matrix[i][j] = f(matrix[i][j], matrix[i+1][j], matrix[i][j+1], matrix[i+1][j+1]);
 			}
 		}
 	}
@@ -79,6 +83,18 @@ int main(int argc, char **argv){
 		MPI_Send(&sum, 1, MPI_LONG_LONG, 0, 1, MPI_COMM_WORLD);
 	}
 
+
+	
+	long long mid = 0;
+	int mid_rank = n / 2;
+
+	if(rank == 0){
+		MPI_Recv(&mid, 1, MPI_LONG_LONG, mid_rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	}else if(rank == mid_rank){
+		MPI_Send(&matrix[0][n/2], 1, MPI_LONG_LONG, 0, 1, MPI_COMM_WORLD);
+	}
+
+
 	MPI_Barrier(MPI_COMM_WORLD);
 
 	double endTime, totalTime;
@@ -87,10 +103,13 @@ int main(int argc, char **argv){
 		double totalTime = endTime - startTime;
 		cout << "The total time is: " << totalTime<<endl;
 		cout << "sum is: "<<sum<<endl;
+		cout << "mid is: "<<mid<<endl;
 	}
 
 	// cout << matrix.size() << endl;
-	printMatrix(matrix);
+	//printMatrix(matrix);
+	
+	
 
 
 	MPI_Finalize();

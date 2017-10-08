@@ -86,6 +86,7 @@ int main(int argc, char **argv){
 		double endTime = MPI_Wtime();
 		double totalTime = endTime - startTime;
 		cout << "The total time is: " << totalTime<<endl;
+		cout << "sum is: "<<sum<<endl;
 	}
 
 	// cout << matrix.size() << endl;

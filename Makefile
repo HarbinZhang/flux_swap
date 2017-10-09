@@ -20,9 +20,13 @@ test:
 hello: hello.c
 	${MPICC} -o hello hello.c
 
-mpi_test: main.cpp
+mpid: main.cpp
 	${MPICPP} -o main main.cpp
-	mpirun -n 2 ./main 150
+	mpirun -n 36 ./main 150
+
+mpis: main.cpp
+	${MPICPP} -o main main.cpp
+	mpirun -n 1 ./main 150
 
 
 git:

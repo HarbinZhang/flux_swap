@@ -5,6 +5,7 @@
 #include <iostream>
 #include <math.h>
 #include "f.h"
+#include <fstream>
 using namespace std;
 
 // helper funcions
@@ -34,22 +35,14 @@ int main(int argc, char **argv){
 	MPI_Barrier(MPI_COMM_WORLD);
 	double startTime = MPI_Wtime();
 
+	if(rank == 0){cout<<"<<<<<<<<<<<<<<<<<<<<<< start "<<endl;}
 
-
+	ofstream myfile;
+	myfile.open ("example.txt");
 	// send row value to rank - 1
-	if(rank != 0){
-		MPI_Send(&matrix[0].front(), n, MPI_LONG_LONG, rank - 1, 1, MPI_COMM_WORLD);
-	}
-	if(rank != p - 1){
-		MPI_Recv(&matrix[bandwidth].front(), n, MPI_LONG_LONG, rank + 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	}
 
-	// if(rank == 0){cout<<"send row done "<< matrix[75][1] <<endl;}
-	// else{
-	// 	cout<<"hi "<<matrix[0][1]<<endl;
-	// }
 
-	// iteration
+	
 	int row_start = 0;
 	if (rank == 0){
 		row_start = 1;
@@ -60,6 +53,17 @@ int main(int argc, char **argv){
 	}
 
 	for(int k = 0; k < 10; k++){
+		if(rank != 0){
+			MPI_Send(&matrix[0].front(), n, MPI_LONG_LONG, rank - 1, 1, MPI_COMM_WORLD);
+		}
+		if(rank != p - 1){
+			MPI_Recv(&matrix[bandwidth].front(), n, MPI_LONG_LONG, rank + 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		}
+
+
+
+
+		// iteration
 		for(int i = row_start; i < row_end; i++){
 			for(int j = 1; j < n - 1; j++){
 				matrix[i][j] = f(matrix[i][j], matrix[i+1][j], matrix[i][j+1], matrix[i+1][j+1]);
@@ -67,31 +71,36 @@ int main(int argc, char **argv){
 		}
 	}
 
-	int temp = 0;
-	if(rank == 0){
-		for(int i= 0; i<150; i++){
-			temp += matrix[75][i];
-		}
-		cout<<"0 ceshi"<<temp<<" "<<matrix[75][75]<<endl;
-	}else{
-		for(int i= 0; i<150; i++){
-			temp += matrix[0][i];
-		}
-		cout<<"1 ceshi"<<temp<<" "<<matrix[0][75]<<endl;		
-	}
+	if(rank == 0){cout<<"<<<<<<<<<<<<<<<<<<<<<< iteration done "<<endl;}
 
-	
-	if(rank == 0){cout<<"iteration done "<<" "<<row_end<<endl;}
+	// printMatrix(matrix);
+
 
 	// sum
 	long long sum = 0;
 	for(int i = 0; i < bandwidth; i++){
 		for(int j = 0; j < n; j++){
 			sum += matrix[i][j];
+			if(rank == 2){myfile<<matrix[i][j]<<" ";}
 		}
+		myfile<<"\n";
 	}
 
-	if(rank == 0){cout<<"sum done "<<sum<<endl;}
+	int temp = 0;
+	if(rank == 3){
+		cout<<"p3 sum is : "<<sum<<" "<<bandwidth<<endl;
+	}else if(rank == 0 && p==1){
+		for(int i = 2*floor(n/4); i < 3*floor(n/4); i++){
+			for(int j = 0; j < n; j++){
+				temp += matrix[i][j];
+				myfile<<matrix[i][j]<<" ";
+			}
+			myfile<<"\n";
+		}
+		cout<<"p3 sum is : "<<temp<<" "<<3*floor(n/4)<<endl;
+	}
+
+
 
 	// send back
 	if(rank == 0){
@@ -104,7 +113,7 @@ int main(int argc, char **argv){
 		MPI_Send(&sum, 1, MPI_LONG_LONG, 0, 1, MPI_COMM_WORLD);
 	}
 	
-	if(rank == 0){cout<<"send back done"<<endl;}
+
 
 	
 	long long mid = matrix[bandwidth/2][n/2];
@@ -120,7 +129,7 @@ int main(int argc, char **argv){
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	if(rank == 0){cout<<"send mid done"<<endl;}
+
 	
 
 	double endTime, totalTime;
@@ -134,6 +143,8 @@ int main(int argc, char **argv){
 
 	// cout << matrix.size() << endl;
 	//printMatrix(matrix);
+	myfile.close();
+
 
 	MPI_Finalize();
 	return 0;
@@ -141,28 +152,32 @@ int main(int argc, char **argv){
 }
 
 vector<vector<long long> >initMatrix(int n, int p, int rank){
-	vector<vector<long long> > res;
-	vector<long long> row;
 
-	bandwidth = n/p;
+	
+
+	bandwidth = floor(n/p);
 	if(rank == p - 1){
-		bandwidth = n - (p-1) * n/p;
+		bandwidth = n - (p-1) * floor(n/p);
+		if(rank==3){cout<<bandwidth<<" "<<(p-1) * floor(n/p)<<endl;}
 	}
 
-	vector<long long> null_vec(n, 0);
+	vector<long long> row(n, 0);
+	vector<vector<long long> > res(bandwidth+1, row);
+
+	
 	// res.push_back(null_vec);
 
-	for(int i = rank*n/p; i < rank*n/p + bandwidth; i++){
+
+	for(int i = rank*floor(n/p); i < rank*floor(n/p) + bandwidth; i++){
 		for(int j = 0; j < n; j++){
 			long long val = i + j * n;
-			row.push_back(val);
+			res[i - rank*floor(n/p)][j] = val;
 		}
-		res.push_back(row);
-		row.clear();
+
 	}
 
 
-	res.push_back(null_vec);
+
 	return res;
 }
 

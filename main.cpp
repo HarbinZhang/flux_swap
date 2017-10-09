@@ -35,7 +35,7 @@ int main(int argc, char **argv){
 	MPI_Barrier(MPI_COMM_WORLD);
 	double startTime = MPI_Wtime();
 
-	if(rank == 0){cout<<"<<<<<<<<<<<<<<<<<<<<<< start "<<endl;}
+	if(rank == 0){cout<<"<<<<<<<<<<<<<<<<<<<<<< start <<p "<<p<<" n: "<<n<<endl;}
 
 
 	// send row value to rank - 1

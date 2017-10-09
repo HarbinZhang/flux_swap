@@ -5,7 +5,7 @@
 #include <iostream>
 #include <math.h>
 #include "f.h"
-#include <fstream>
+
 using namespace std;
 
 // helper funcions
@@ -37,8 +37,7 @@ int main(int argc, char **argv){
 
 	if(rank == 0){cout<<"<<<<<<<<<<<<<<<<<<<<<< start "<<endl;}
 
-	ofstream myfile;
-	myfile.open ("example.txt");
+
 	// send row value to rank - 1
 
 
@@ -81,9 +80,7 @@ int main(int argc, char **argv){
 	for(int i = 0; i < bandwidth; i++){
 		for(int j = 0; j < n; j++){
 			sum += matrix[i][j];
-			if(rank == 2){myfile<<matrix[i][j]<<" ";}
 		}
-		myfile<<"\n";
 	}
 
 	int temp = 0;
@@ -93,11 +90,10 @@ int main(int argc, char **argv){
 		for(int i = 2*floor(n/4); i < 3*floor(n/4); i++){
 			for(int j = 0; j < n; j++){
 				temp += matrix[i][j];
-				myfile<<matrix[i][j]<<" ";
+
 			}
-			myfile<<"\n";
+
 		}
-		cout<<"p3 sum is : "<<temp<<" "<<3*floor(n/4)<<endl;
 	}
 
 
@@ -141,9 +137,7 @@ int main(int argc, char **argv){
 		cout << "mid is: "<<mid<<endl;
 	}
 
-	// cout << matrix.size() << endl;
-	//printMatrix(matrix);
-	myfile.close();
+
 
 
 	MPI_Finalize();

@@ -28,6 +28,10 @@ mpis: main.cpp
 	${MPICPP} -o main main.cpp
 	mpirun -n 1 ./main 150
 
+mpisd: recDecomposition.cpp
+	${MPICPP} -o recDecomposition recDecomposition.cpp
+	mpirun -n 81 ./recDecomposition 150
+
 
 git:
 	git add .

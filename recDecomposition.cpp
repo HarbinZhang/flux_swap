@@ -25,7 +25,6 @@ int main(int argc, char **argv){
 	int p;		// size of processors
 	int n = atoi(argv[1]);
 
-
 	MPI_Status status;
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -36,7 +35,7 @@ int main(int argc, char **argv){
 	MPI_Barrier(MPI_COMM_WORLD);
 	double startTime = MPI_Wtime();
 
-	if(rank == 0){cout<<"<<<<<<<<<<<<<<<<<<<<<< start "<<endl;}
+	if(rank == 0){cout<<"<<<<<<<<<<<<<<<<<<<<<< start <<p "<<p<<" n: "<<n<<endl;}
 
 	int row_start_func = 0;
 	if (start_row == 0){

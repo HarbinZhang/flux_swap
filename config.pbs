@@ -3,7 +3,7 @@
 #PBS -N output_pbs
 #PBS -A eecs587-f17_flux
 #PBS -q flux
-#PBS -l procs=4,walltime=0:5:0
+#PBS -l procs=36,walltime=0:5:0
 #PBS -l pmem=100mb
 #PBS -q flux
 #PBS -m abe
@@ -13,5 +13,5 @@
 echo "I ran on:"
 cat $PBS_NODEFILE
 # Let PBS handle your output
-cd ./
-mpirun -np 4 ./main 16
+cd ./flux_swap
+mpirun -np 4 ./recDecomposition 1000

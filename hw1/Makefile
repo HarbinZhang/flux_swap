@@ -32,8 +32,7 @@ mpisd: recDecomposition.cpp
 	${MPICPP} -o recDecomposition recDecomposition.cpp
 	mpirun -n 81 ./recDecomposition 150
 
-
-git:
+t:
 	git add .
 	git commit -m "auto"
 	git push

@@ -25,7 +25,7 @@ int main(){
 	omp_init_lock(&lock);
 	omp_init_lock(&lock_q);
 
-	// omp_get_wtime();
+	double start = omp_get_wtime();
 	#pragma omp parallel
 	{
 		double local_M = 0;
@@ -38,9 +38,9 @@ int main(){
 
 			if(temp.second == 0){continue;}
 
-			omp_set_lock(&lock);
-			cout<<"temp: "<<temp.first<<" "<<temp.second<<endl;
-			omp_unset_lock(&lock);			
+			// omp_set_lock(&lock);
+			// cout<<"temp: "<<temp.first<<" "<<temp.second<<endl;
+			// omp_unset_lock(&lock);			
 
 			double a = temp.first;
 			double b = temp.second;
@@ -48,20 +48,20 @@ int main(){
 			omp_set_lock(&lock);
 			M = max(M, g(a));
 			M = max(M, g(b));
-			cout<<"new M: "<<M<<" a: "<<a<<" b: "<<b<<endl;
+			// cout<<"new M: "<<M<<" a: "<<a<<" b: "<<b<<endl;
 			omp_unset_lock(&lock);
 
 
 			double newg = (g(a) + g(b) + s*(b-a)) / 2;
 
 			omp_set_lock(&lock);
-			cout<<"newg: "<<newg<<" M: "<<M<<endl;
+			// cout<<"newg: "<<newg<<" M: "<<M<<endl;
 			if(newg < M + fai){
-				res = max(M, res);
+				// res = max(M, res);
 				omp_unset_lock(&lock);
 			}else{
 				// omp_set_lock(&lock);
-				cout<<"a+b: "<<a+b<<endl;
+				// cout<<"a+b: "<<a+b<<endl;
 				omp_unset_lock(&lock);
 
 				q.push(make_pair (a, (a+b)/2));
@@ -70,15 +70,17 @@ int main(){
 			}
 		}
 		// omp_unset_lock(&lock);
-		omp_set_lock(&lock);
-		cout<<"M: "<<M<<" with id= "<<omp_get_thread_num()<<endl;
-		omp_unset_lock(&lock);
+		// omp_set_lock(&lock);
+		// cout<<"M: "<<M<<" with id= "<<omp_get_thread_num()<<endl;
+		// omp_unset_lock(&lock);
 
 		#pragma omp barrier			
 	}
 
-	#pragma omp barrier
-	cout<<"res: "<<res<<endl;
+
+	double end = omp_get_wtime();
+	cout<<"M: "<<M<<" duration: "<<end - start<<endl;
+
 	omp_destroy_lock(&lock);
 	omp_destroy_lock(&lock_q);
 

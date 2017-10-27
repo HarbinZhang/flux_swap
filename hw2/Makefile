@@ -1,4 +1,7 @@
 
+submit:
+	sbatch -options submit.sh
+
 main:
 	g++-7 main.cpp -fopenmp -o main.out
 	./main.out

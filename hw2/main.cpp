@@ -10,7 +10,7 @@ using namespace std;
 
 
 static const int s = 12;
-static const double fai = 1e-2;
+static const double fai = 1e-6;
 
 
 int main(){
@@ -18,7 +18,7 @@ int main(){
 	Myqueue q;
 	double res = 0;
 	double M = 0;
-	q.push(make_pair(1.0, 5.0));
+	q.push(make_pair(1.0, 100.0));
 
 	omp_lock_t lock;
 	omp_lock_t lock_q;

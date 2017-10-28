@@ -7,6 +7,6 @@
 set -x
 
 # run OpenMP program
-export OMP_NUM_THREAD=28
-./main.out
+export OMP_NUM_THREAD=4
+./ceshi.out
 

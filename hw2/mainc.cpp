@@ -7,7 +7,7 @@
 #include "g.h"
 #include <queue>
 #include <stack>
-// #include "Myqueue.h"
+
 using namespace std;
 
 
@@ -54,9 +54,9 @@ int main(){
 
 			// if(temp.second == 0){continue;}
 
-			omp_set_lock(&lock);
-			cout<<"temp: "<<temp.first<<" "<<temp.second<<endl;
-			omp_unset_lock(&lock);			
+			// omp_set_lock(&lock);
+			// cout<<"temp: "<<temp.first<<" "<<temp.second<<endl;
+			// omp_unset_lock(&lock);			
 
 			double a = temp.first;
 			double b = temp.second;
@@ -64,27 +64,27 @@ int main(){
 			double ga = g(a);
 			double gb = g(b);
 
-			omp_set_lock(&lock_q);
+			omp_set_lock(&lock);
 			M = max(M, ga);
 			M = max(M, gb);
-			cout<<"new M: "<<M<<" a: "<<a<<" b: "<<b<<endl;
-			omp_unset_lock(&lock_q);
+			// cout<<"new M: "<<M<<" a: "<<a<<" b: "<<b<<endl;
+			omp_unset_lock(&lock);
 
 			double newg = (g(a) + g(b) + s*(b-a)) / 2;
 
-			omp_set_lock(&lock_q);
+			omp_set_lock(&lock);
 			// cout<<"newg: "<<newg<<" M: "<<M<<endl;
 			if(newg < M + fai){
 				// res = max(M, res);
-				// omp_unset_lock(&lock);
-				// omp_set_lock(&lock_q);
+				omp_unset_lock(&lock);
+				omp_set_lock(&lock_q);
 				num_available_threads++;
 			}else{
 				// omp_set_lock(&lock);
 				// cout<<"a+b: "<<a+b<<endl;
-				// omp_unset_lock(&lock);
+				omp_unset_lock(&lock);
 
-				// omp_set_lock(&lock_q);
+				omp_set_lock(&lock_q);
 				q.push(make_pair (a, (a+b)/2));
 				q.push(make_pair ((a+b)/2, b));
 				num_available_threads++;

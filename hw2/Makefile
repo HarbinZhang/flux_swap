@@ -15,5 +15,6 @@ maino:
 	./maino.out	
 
 mainc:
-	g++-7 mainc.cpp -fopenmp -o mainc.out
+	g++ mainc.cpp -fopenmp -o mainc.out
 	./mainc.out	
+

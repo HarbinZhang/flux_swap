@@ -10,7 +10,7 @@ using namespace std;
 
 
 static const int s = 12;
-static const double fai = 1e-2;
+static const double fai = 1e-6;
 
 
 int main(){
@@ -18,7 +18,7 @@ int main(){
 	queue<pair<double, double> > q;
 	double res = 0;
 	double M = 0;
-	q.push(make_pair(1.0, 5.0));
+	q.push(make_pair(1.0, 100.0));
 
 	omp_lock_t lock_M;
 	omp_lock_t lock_q;
@@ -30,26 +30,27 @@ int main(){
 	omp_init_lock(&lock_qchanged);
 
 	double start = omp_get_wtime();
-	int Nthread = omp_get_num_threads();
-	int curt_available_nthread = Nthread;
+	int num_active_threads = 0;
+
 	#pragma omp parallel
 	{
 		stack<pair <double, double> > stack;
 		// omp_set_lock(&lock_thread);
-		omp_set_lock(&lock_q);
-		while(!q.empty() && curt_available_nthread < Nthread){
+		
+		while(true){
+			omp_set_lock(&lock_q);
 			if(q.empty()){
-				// curt_available_nthread++;
+				// num_active_threads++;
 				// omp_unset_lock(&lock_thread);
-				omp_unset_lock(&lock_q);
-				while(1){
-
-					if(q.empty() && curt_available_nthread == Nthread){
-						break;
-					}
+				
+				if(num_active_threads == 0){
+					omp_unset_lock(&lock_q);
+					break;
+				}else{
+					omp_unset_lock(&lock_q);
 				}
 			}else{
-				curt_available_nthread--;
+				num_active_threads++;
 				// omp_unset_lock(&lock_thread);
 				pair<double, double> temp = q.front();
 				q.pop();
@@ -88,17 +89,22 @@ int main(){
 						stack.push(make_pair (a, (a+b)/2));
 
 						omp_set_lock(&lock_q);
-						q.push(make_pair ((a+b)/2, b));
+						if(omp_get_num_threads() > num_active_threads){
+							q.push(make_pair ((a+b)/2, b));
+						}else{
+							stack.push(make_pair ((a+b)/2, b));
+						}
+						// q.push(make_pair ((a+b)/2, b));
 						omp_unset_lock(&lock_q);
 					}
 				}
-				// omp_set_lock(&lock_thread);
-				curt_available_nthread++;
-				// omp_unset_lock(&lock_thread);
+				omp_set_lock(&lock_q);
+				num_active_threads--;
+				omp_unset_lock(&lock_q);
 			}
 		}
 		// omp_unset_lock(&lock_thread);
-		omp_unset_lock(&lock_q);
+		
 	}
 
 	double end = omp_get_wtime();

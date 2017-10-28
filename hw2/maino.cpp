@@ -35,12 +35,12 @@ int main(){
 	#pragma omp parallel
 	{
 		stack<pair <double, double> > stack;
-		omp_set_lock(&lock_thread);
+		// omp_set_lock(&lock_thread);
 		omp_set_lock(&lock_q);
 		while(!q.empty() && curt_available_nthread < Nthread){
 			if(q.empty()){
 				// curt_available_nthread++;
-				omp_unset_lock(&lock_thread);
+				// omp_unset_lock(&lock_thread);
 				omp_unset_lock(&lock_q);
 				while(1){
 
@@ -50,7 +50,7 @@ int main(){
 				}
 			}else{
 				curt_available_nthread--;
-				omp_unset_lock(&lock_thread);
+				// omp_unset_lock(&lock_thread);
 				pair<double, double> temp = q.front();
 				q.pop();
 				omp_unset_lock(&lock_q);
@@ -92,12 +92,12 @@ int main(){
 						omp_unset_lock(&lock_q);
 					}
 				}
-				omp_set_lock(&lock_thread);
+				// omp_set_lock(&lock_thread);
 				curt_available_nthread++;
-				omp_unset_lock(&lock_thread);
+				// omp_unset_lock(&lock_thread);
 			}
 		}
-		omp_unset_lock(&lock_thread);
+		// omp_unset_lock(&lock_thread);
 		omp_unset_lock(&lock_q);
 	}
 
@@ -105,7 +105,7 @@ int main(){
 	cout<<"M: "<<M<<" duration: "<<end - start<<endl;
 	omp_destroy_lock(&lock_M);
 	omp_destroy_lock(&lock_q);
-	omp_destroy_lock(&lock_thread);
+	// omp_destroy_lock(&lock_thread);
 	omp_destroy_lock(&lock_qchanged);
 
 	return 0;

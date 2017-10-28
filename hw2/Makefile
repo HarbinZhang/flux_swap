@@ -11,7 +11,7 @@ ceshi:
 	./ceshi.out
 
 maino:
-	g++-7 maino.cpp -fopenmp -o maino.out
+	g++ maino.cpp -fopenmp -o maino.out
 	./maino.out	
 
 mainc:

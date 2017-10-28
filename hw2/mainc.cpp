@@ -24,30 +24,38 @@ int main(){
 
 	omp_lock_t lock;
 	omp_lock_t lock_q;
+	omp_lock_t lock_qchanged;
+
 	omp_init_lock(&lock);
 	omp_init_lock(&lock_q);
+	omp_init_lock(&lock_qchanged);
 
-	int Nthreads = omp_get_thread_num();
-	int num_available_threads = Nthreads;
-	// cout<<Nthreads<<endl;
+	int num_active_threads = 0;
 
 	double start = omp_get_wtime();
+
 
 	#pragma omp parallel
 	{
 		// double local_M = 0;
-		omp_set_lock(&lock_q);
-		while(q.size() > 0 || num_available_threads < Nthreads){
-			// omp_unset_lock(&lock);
+		
+		while(true){
+			omp_set_lock(&lock_q);
 			if(q.empty()){
-				cout<<"nthreads: "<<num_available_threads<<" M: "<<M<<endl;
-				omp_unset_lock(&lock_q);
-				continue;
+				// cout<<"nthreads: "<<num_active_threads<<" M: "<<M<<endl;
+				if(num_active_threads == 0){
+					omp_unset_lock(&lock_q);
+					break;
+				}
+				else{
+					omp_unset_lock(&lock_q);
+					continue;
+				}
 			}
 
 			pair<double, double> temp = q.top();
 			q.pop();				
-			num_available_threads--;
+			num_active_threads++;
 			omp_unset_lock(&lock_q);			
 
 			
@@ -78,7 +86,8 @@ int main(){
 				// res = max(M, res);
 				omp_unset_lock(&lock);
 				omp_set_lock(&lock_q);
-				num_available_threads++;
+				num_active_threads--;
+				omp_unset_lock(&lock_q);
 			}else{
 				// omp_set_lock(&lock);
 				// cout<<"a+b: "<<a+b<<endl;
@@ -87,8 +96,8 @@ int main(){
 				omp_set_lock(&lock_q);
 				q.push(make_pair (a, (a+b)/2));
 				q.push(make_pair ((a+b)/2, b));
-				num_available_threads++;
-				// omp_unset_lock(&lock_q);
+				num_active_threads--;
+				omp_unset_lock(&lock_q);
 			}
 		}
 		omp_unset_lock(&lock_q);

@@ -18,7 +18,7 @@ int main(){
 	queue<pair<double, double> > q;
 	double res = 0;
 	double M = 0;
-	q.push(make_pair(1.0, 100.0));
+	q.push(make_pair(1.0, 25.0));
 
 	omp_lock_t lock_M;
 	omp_lock_t lock_q;

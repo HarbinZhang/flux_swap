@@ -18,7 +18,7 @@ int main(){
 	queue<pair<double, double> > q;
 	double res = 0;
 	double M = 0;
-	q.push(make_pair(1.0, 100.0));
+	q.push(make_pair(1.0, 15.0));
 
 	omp_lock_t lock_M;
 	omp_lock_t lock_q;
@@ -72,7 +72,7 @@ int main(){
 					// cout<<"new M: "<<M<<" a: "<<a<<" b: "<<b<<endl;
 					omp_unset_lock(&lock_M);					
 
-					double newg = (g(a) + g(b) + s*(b-a)) / 2;
+					double newg = (ga + gb + s*(b-a)) / 2;
 
 					omp_set_lock(&lock_M);
 					// cout<<"newg: "<<newg<<" M: "<<M<<endl;

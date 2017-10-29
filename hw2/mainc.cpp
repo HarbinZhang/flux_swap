@@ -78,7 +78,7 @@ int main(){
 			// cout<<"new M: "<<M<<" a: "<<a<<" b: "<<b<<endl;
 			omp_unset_lock(&lock);
 
-			double newg = (g(a) + g(b) + s*(b-a)) / 2;
+			double newg = (ga + gb + s*(b-a)) / 2;
 
 			omp_set_lock(&lock);
 			// cout<<"newg: "<<newg<<" M: "<<M<<endl;

@@ -20,7 +20,7 @@ int main(){
 	stack<pair<double, double> > q;
 	// double res = 0;
 	double M = 0;
-	q.push(make_pair(1.0, 5.0));
+	q.push(make_pair(1.0, 50.0));
 
 	omp_lock_t lock;
 	omp_lock_t lock_q;

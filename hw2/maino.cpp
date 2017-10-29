@@ -18,16 +18,15 @@ int main(){
 	queue<pair<double, double> > q;
 	double res = 0;
 	double M = 0;
-	q.push(make_pair(1.0, 25.0));
+	q.push(make_pair(1.0, 100.0));
 
 	omp_lock_t lock_M;
 	omp_lock_t lock_q;
-	omp_lock_t lock_thread;
-	omp_lock_t lock_qchanged;
+	// omp_lock_t lock_thread;
+	// omp_lock_t lock_qchanged;
 	omp_init_lock(&lock_M);
 	omp_init_lock(&lock_q);
-	omp_init_lock(&lock_thread);
-	omp_init_lock(&lock_qchanged);
+	// omp_init_lock(&lock_thread);
 
 	double start = omp_get_wtime();
 	int num_active_threads = 0;
@@ -103,6 +102,8 @@ int main(){
 				omp_unset_lock(&lock_q);
 			}
 		}
+		// cout<< " #threads: "<<omp_get_num_threads()<<endl;
+		#pragma omp barrier	
 		// omp_unset_lock(&lock_thread);
 		
 	}
@@ -112,10 +113,10 @@ int main(){
 	omp_destroy_lock(&lock_M);
 	omp_destroy_lock(&lock_q);
 	// omp_destroy_lock(&lock_thread);
-	omp_destroy_lock(&lock_qchanged);
+	// omp_destroy_lock(&lock_qchanged);
 
 	return 0;
 }
-
+	
 
 

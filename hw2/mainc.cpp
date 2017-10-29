@@ -10,9 +10,9 @@
 
 using namespace std;
 
-
+	
 static const int s = 12;
-static const double fai = 1e-2;
+static const double fai = 1e-6;
 
 
 int main(){
@@ -20,7 +20,7 @@ int main(){
 	stack<pair<double, double> > q;
 	// double res = 0;
 	double M = 0;
-	q.push(make_pair(1.0, 50.0));
+	q.push(make_pair(1.0, 15.0));
 
 	omp_lock_t lock;
 	omp_lock_t lock_q;
@@ -104,6 +104,10 @@ int main(){
 		// omp_set_lock(&lock);
 		// cout<<"M: "<<M<<" with id= "<<omp_get_thread_num()<<endl;
 		// omp_unset_lock(&lock);
+		
+		cout<< " #threads: "<<omp_get_num_threads()<<endl;			
+		// #pragma omp barrier	
+
 	}
 
 

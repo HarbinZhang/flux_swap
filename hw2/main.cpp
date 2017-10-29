@@ -40,7 +40,8 @@ int main(){
 
 
 		omp_set_lock(&lock_q);
-		while(!q.empty() && num_available_threads){
+		// while(!q.empty() && num_available_threads){
+		while(!q.empty()){
 			num_available_threads--;
 			// omp_unset_lock(&lock);
 			pair<double, double> temp = q.front();

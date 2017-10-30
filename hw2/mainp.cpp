@@ -13,7 +13,7 @@ using namespace std;
 
 	
 static const int s = 12;
-static const double fai = 1e-4;
+static const double fai = 1e-6;
 
 class Node
 {

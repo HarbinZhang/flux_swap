@@ -8,4 +8,4 @@ set -x
 
 # run OpenMP program
 export OMP_NUM_THREAD=7
-./maino.out
+./mainp.out

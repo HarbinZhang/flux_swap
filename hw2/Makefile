@@ -11,10 +11,13 @@ ceshi:
 	./ceshi.out
 
 maino:
-	g++ maino.cpp -fopenmp -o maino.out
+	g++-7 maino.cpp -fopenmp -o maino.out
 	./maino.out	
 
 mainc:
-	g++ mainc.cpp -fopenmp -o mainc.out
+	g++-7 mainc.cpp -fopenmp -o mainc.out
 	./mainc.out	
 
+mainp:
+	g++-7 mainp.cpp -fopenmp -o mainp.out
+	./mainp.out

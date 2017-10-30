@@ -6,6 +6,7 @@
 #include <utility>
 #include "g.h"
 #include <queue>
+#include <vector>
 #include <stack>
 
 using namespace std;
@@ -20,20 +21,38 @@ public:
 	double first, second;
 	double ga, gb;
 	bool ga_valid, gb_valid;
+	double M;
 
-	Node(double first, double second, double ga, double gb, bool ga_valid, bool gb_valid){
-		
+	Node(double first, double second, double M, double ga, double gb, bool ga_valid, bool gb_valid){
+		this->first = first;
+		this->second = second;
+		this->ga = ga;
+		this->gb = gb;
+		this->ga_valid = ga_valid;
+		this->gb_valid = gb_valid;
+		this->M = M;
 	}
 	~Node();
 	
 };
 
+struct LessThanByM
+{
+  bool operator()(const Node* lhs, const Node* rhs) const
+  {
+    return lhs->M < rhs->M;
+  }
+};
+
+
 int main(){
 
-	stack<pair<double, double> > q;
+	// stack<Node *> q;
+	priority_queue<Node*, vector<Node*>, LessThanByM> q; 
 	// double res = 0;
 	double M = 0;
-	q.push(make_pair(1.0, 100.0));
+	Node* node_p = new Node(1.0, 100.0, 0, 0, 0, false, false);
+	q.push(node_p);
 
 	omp_lock_t lock;
 	omp_lock_t lock_q;
@@ -66,7 +85,7 @@ int main(){
 				}
 			}
 
-			pair<double, double> temp = q.top();
+			Node* temp = q.top();
 			q.pop();				
 			num_active_threads++;
 			omp_unset_lock(&lock_q);			
@@ -79,11 +98,13 @@ int main(){
 			// cout<<"temp: "<<temp.first<<" "<<temp.second<<endl;
 			// omp_unset_lock(&lock);			
 
-			double a = temp.first;
-			double b = temp.second;
+			double a = temp->first;
+			double b = temp->second;
 
-			double ga = g(a);
-			double gb = g(b);
+			double ga = temp->ga_valid ? temp->ga:g(a);
+			double gb = temp->gb_valid ? temp->gb:g(b);
+			// double ga = g(a);
+			// double gb = g(b);
 
 			omp_set_lock(&lock);
 			M = max(M, ga);
@@ -107,8 +128,12 @@ int main(){
 				omp_unset_lock(&lock);
 
 				omp_set_lock(&lock_q);
-				q.push(make_pair (a, (a+b)/2));
-				q.push(make_pair ((a+b)/2, b));
+				// q.push(make_pair (a, (a+b)/2));
+				// q.push(make_pair ((a+b)/2, b));
+				Node* temp = new Node(a, (a+b)/2, newg, ga, 0, true, false);
+				q.push(temp);
+				temp = new Node((a+b)/2, b, newg, 0, gb, false, true);
+				q.push(temp);
 				num_active_threads--;
 				omp_unset_lock(&lock_q);
 			}

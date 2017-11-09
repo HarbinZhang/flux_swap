@@ -34,7 +34,7 @@ int main(int argc, char ** argv) {
 	cudaDeviceSynchronize();
 
 	// copy back the result array to the CPU
-	// cudaMemcpy(h_out, d_out, ARRAY_BYTES, cudaMemcpyDeviceToHost);
+	cudaMemcpy(h_out, d_out, ARRAY_BYTES, cudaMemcpyDeviceToHost);
 
 	// print out the resulting array
 	for (int i =0; i < ARRAY_SIZE; i++) {

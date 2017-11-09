@@ -3,7 +3,7 @@
 __global__ void square(float * d_out, float * d_in){
 	// Todo: Fill in this function
   int index = threadIdx.x;
-  d_out[index] = d_in[index] * d_in[index];
+  d_out[index] = 1;
   __syncthreads();
 }
 

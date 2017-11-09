@@ -4,6 +4,7 @@ __global__ void square(float * d_out, float * d_in){
 	// Todo: Fill in this function
   int index = threadIdx.x;
   d_out[index] = d_in[index] * d_in[index];
+  __syncthreads();
 }
 
 int main(int argc, char ** argv) {
@@ -26,10 +27,11 @@ int main(int argc, char ** argv) {
 	cudaMalloc((void**) &d_out, ARRAY_BYTES);
 
 	// transfer the array to the GPU
-	// cudaMemcpy(d_in, h_in, ARRAY_BYTES, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_in, h_in, ARRAY_BYTES, cudaMemcpyHostToDevice);
 
 	// launch the kernel
-	// square<<<1, ARRAY_SIZE>>>(d_out, d_in);
+	square<<<1, ARRAY_SIZE>>>(d_out, d_in);
+	cudaDeviceSynchronize();
 
 	// copy back the result array to the CPU
 	// cudaMemcpy(h_out, d_out, ARRAY_BYTES, cudaMemcpyDeviceToHost);

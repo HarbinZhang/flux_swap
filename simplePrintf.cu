@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     dim3 dimBlock(2, 2, 2);
     testKernel<<<dimGrid, dimBlock>>>(10);
     cudaDeviceSynchronize();
-	printf("hi");
+	printf("hi\n");
     return EXIT_SUCCESS;
 }
 

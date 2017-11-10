@@ -3,7 +3,7 @@
 #PBS -N HW4
 #PBS -A eecs587-f17_fluxg
 #PBS -l qos=flux
-#PBS -l nodes=1:gpus=1,walltime=0:5:0
+#PBS -l nodes=1:gpus=1,walltime=0:0:30
 #PBS -l mem=2gb
 #PBS -q fluxg
 #PBS -m n
@@ -13,4 +13,4 @@ echo "I ran on:"
 cat $PBS_NODEFILE
 # Let PBS handle your output
 cd ./flux_swap
-./atomic.out
+./main.out

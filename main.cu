@@ -13,22 +13,11 @@ __global__ void init(int *g)
 	g[i] = i;
 }
 
-void print_array(int *array, int size)
-{
-    printf("{ ");
-    for (int i = 0; i < size; i++)  {
-    	for (int j = 0; j < size; j++)
-    		{ printf("%d ", array[i][j]); }
-    	printf("\n");
-    }
-    
-    printf("}\n");
-}
 
 int main(int argc, char ** argv) {
     // declare and allocate host memory
     int h_array[ARRAY_SIZE][ARRAY_SIZE];
-    const int ARRAY_BYTES = ARRAY_SIZE * sizeof(int);
+    const int ARRAY_BYTES = ARRAY_SIZE * ARRAY_SIZE * sizeof(int);
  
     // declare, allocate, and zero out GPU memory
     int * d_array;
@@ -40,7 +29,16 @@ int main(int argc, char ** argv) {
     init<<<1, dimBlock>>>(d_array);
 
     cudaMemcpy(h_array, d_array, ARRAY_BYTES, cudaMemcpyDeviceToHost);
-    print_array(h_array, ARRAY_SIZE);
+
+    printf("{ ");
+    for (int i = 0; i < ARRAY_SIZE; i++)  {
+    	for (int j = 0; j < ARRAY_SIZE; j++)
+    		{ printf("%d ", h_array[i][j]); }
+    	printf("\n");
+    }
+    
+    printf("}\n");
+
 
     cudaFree(d_array);
 

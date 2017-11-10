@@ -27,6 +27,10 @@ int main(int argc, char ** argv) {
     double h_array[ARRAY_SIZE][ARRAY_SIZE];
     const int ARRAY_BYTES = ARRAY_SIZE * ARRAY_SIZE * sizeof(double);
  
+    clock_t cpu_startTime, cpu_endTime;
+    double cpu_ElapseTime=0;
+	cpu_startTime = clock();
+
     // declare, allocate, and zero out GPU memory
     double * d_array;
     cudaMalloc((void **) &d_array, ARRAY_BYTES);
@@ -40,6 +44,12 @@ int main(int argc, char ** argv) {
 
 
     cudaMemcpy(h_array, d_array, ARRAY_BYTES, cudaMemcpyDeviceToHost);
+
+	
+	cpu_endTime = clock();
+	cpu_ElapseTime = ((cpu_endTime - cpu_startTime)/CLOCKS_PER_SEC);
+	printf("Time using in CPU is : %f\n", cpu_ElapseTime);
+
 
     printf("{ ");
     for (int i = 0; i < ARRAY_SIZE; i++)  {

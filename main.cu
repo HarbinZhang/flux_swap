@@ -1,49 +1,49 @@
 #include <stdio.h>
 
-__global__ void square(float * d_out, float * d_in){
-	// Todo: Fill in this function
-  int index = threadIdx.x;
-  d_out[index] = 1;
-  __syncthreads();
+#define NUM_THREADS 10000
+#define ARRAY_SIZE  5
+
+#define BLOCK_WIDTH 1000
+
+__global__ void init(int *g)
+{
+	// which thread is this?
+	int i = blockIdx.x * blockDim.x + threadIdx.x; 
+	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
+	g[i] = i;
+}
+
+void print_array(int *array, int size)
+{
+    printf("{ ");
+    for (int i = 0; i < size; i++)  {
+    	for (int j = 0; j < size; j++)
+    		{ printf("%d ", array[i][j]); }
+    	printf("\n");
+    }
+    
+    printf("}\n");
 }
 
 int main(int argc, char ** argv) {
-	const int ARRAY_SIZE = 16;
-	const int ARRAY_BYTES = ARRAY_SIZE * sizeof(float);
+    // declare and allocate host memory
+    int h_array[ARRAY_SIZE][ARRAY_SIZE];
+    const int ARRAY_BYTES = ARRAY_SIZE * sizeof(int);
+ 
+    // declare, allocate, and zero out GPU memory
+    int * d_array;
+    cudaMalloc((void **) &d_array, ARRAY_BYTES);
+    cudaMemset((void *) d_array, 0, ARRAY_BYTES); 
 
-	// generate the input array on the host
-	float h_in[ARRAY_SIZE];
-	for (int i = 0; i < ARRAY_SIZE; i++) {
-		h_in[i] = float(i);
-	}
-	float h_out[ARRAY_SIZE];
+    dim3 dimGrid(2, 2);
+    dim3 dimBlock(ARRAY_SIZE, ARRAY_SIZE);
+    init<<<1, dimBlock>>>(d_array);
 
-	// declare GPU memory pointers
-	float * d_in;
-	float * d_out;
+    cudaMemcpy(h_array, d_array, ARRAY_BYTES, cudaMemcpyDeviceToHost);
+    print_array(h_array, ARRAY_SIZE);
 
-	// allocate GPU memory
-	cudaMalloc((void**) &d_in, ARRAY_BYTES);
-	cudaMalloc((void**) &d_out, ARRAY_BYTES);
+    cudaFree(d_array);
 
-	// transfer the array to the GPU
-	cudaMemcpy(d_in, h_in, ARRAY_BYTES, cudaMemcpyHostToDevice);
-
-	// launch the kernel
-	square<<<1, ARRAY_SIZE>>>(d_out, d_in);
-	cudaDeviceSynchronize();
-
-	// copy back the result array to the CPU
-	cudaMemcpy(h_out, d_out, ARRAY_BYTES, cudaMemcpyDeviceToHost);
-
-	// print out the resulting array
-	for (int i =0; i < ARRAY_SIZE; i++) {
-		printf("%f", h_out[i]);
-		printf(((i % 4) != 3) ? "\t" : "\n");
-	}
-
-	cudaFree(d_in);
-	cudaFree(d_out);
 
 	return 0;
 }

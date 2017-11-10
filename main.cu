@@ -8,7 +8,7 @@ __global__ void square(float * d_out, float * d_in){
 }
 
 int main(int argc, char ** argv) {
-	const int ARRAY_SIZE = 64;
+	const int ARRAY_SIZE = 16;
 	const int ARRAY_BYTES = ARRAY_SIZE * sizeof(float);
 
 	// generate the input array on the host

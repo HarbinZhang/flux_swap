@@ -1,7 +1,7 @@
 #include <stdio.h>
 // #include "gputimer.h"
 
-#define NUM_THREADS 1000000
+#define NUM_THREADS 10000
 #define ARRAY_SIZE  100
 
 #define BLOCK_WIDTH 1000
@@ -55,8 +55,8 @@ int main(int argc,char **argv)
     // uncomment increment_naive to measure speed and accuracy 
     // of non-atomic increments or uncomment increment_atomic to
     // measure speed and accuracy of  atomic icrements
-    // increment_naive<<<NUM_THREADS/BLOCK_WIDTH, BLOCK_WIDTH>>>(d_array);
-    increment_atomic<<<NUM_THREADS/BLOCK_WIDTH, BLOCK_WIDTH>>>(d_array);
+    increment_naive<<<NUM_THREADS/BLOCK_WIDTH, BLOCK_WIDTH>>>(d_array);
+    // increment_atomic<<<NUM_THREADS/BLOCK_WIDTH, BLOCK_WIDTH>>>(d_array);
     // timer.Stop();
     
     // copy back the array of sums from GPU and print

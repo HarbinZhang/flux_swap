@@ -28,18 +28,20 @@ __device__ int partition(double *items, int left, int right, int pivotIndex)
         int pivot = items[pivotIndex];
         int partitionIndex = left;
 
-        swap(items[pivotIndex],items[right]);
+       	double temp = items[right];
+		items[right] = items[partitionIndex];
+		items[partitionIndex] = temp;
         for(int i=left; i < right; i++) {
                 if(items[i]<pivot) {
-                		double temp = item[i];
+                		double temp = items[i];
                 		items[i] = items[partitionIndex];
-                		items[partitionIndex] = items[i];
+                		items[partitionIndex] =	temp;
                         partitionIndex++;
                 }
         }
-		double temp = item[right];
+		double temp = items[right];
 		items[right] = items[partitionIndex];
-		items[partitionIndex] = items[right];
+		items[partitionIndex] = temp;
         return partitionIndex;
 }
 

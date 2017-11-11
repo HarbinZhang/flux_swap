@@ -6,12 +6,14 @@
 #define ARRAY_SIZE  2000
 
 #define BLOCK_WIDTH 1000
+#define 
 
 __global__ void init(double *g)
 {
 	// which thread is this?
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 	int i = blockIdx.x;
+	int 
 	int j = threadIdx.x;
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
@@ -26,7 +28,7 @@ __global__ void init(double *g)
 
 __device__ int partition(double* input, int p, int r)
 {
-    int pivot = input[r];
+    double pivot = input[r];
     
     while ( p < r )
     {
@@ -77,7 +79,7 @@ __global__ void running(double *g)
 		arr[3] = g[index + ARRAY_SIZE];
 		arr[4] = g[index - ARRAY_SIZE];
 
-		int temp = quick_select(arr, 0, 4, 2);
+		double temp = quick_select(arr, 0, 4, 2);
 
 		g[index] = temp;
 	}
@@ -138,9 +140,9 @@ __global__ void handle(double *g, double *r)
 
 	
 
-	running<<<1000, 1000>>>(g);
+	running<<<dim3(2,2), 1000>>>(g);
 
-	getResult<<<1000, 1000>>>(g, r);
+	getResult<<<dim3(2,2), 1000>>>(g, r);
 
 	
 	__syncthreads();
@@ -170,7 +172,8 @@ int main(int argc, char ** argv) {
     // dim3 dimBlock(ARRAY_SIZE, ARRAY_SIZE);
     // init<<<1, dimBlock>>>(d_array);
     // // init<<<1, ARRAY_SIZE*ARRAY_SIZE>>>(d_array);
-    init<<<1000, 1000>>>(d_array);
+    dim3 dimGrid(2,2);
+    init<<<dimGrid, 1000>>>(d_array);
     cudaDeviceSynchronize();
 
 	cpu_startTime = clock();

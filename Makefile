@@ -7,6 +7,8 @@ git:
 main:
 	nvcc -arch=sm_35 -o main.out main.cu -rdc=true -lcudadevrt
 
+main2:
+	nvcc -arch=sm_35 -o main.out main2.cu -rdc=true -lcudadevrt	
 
 simple:
 	nvcc -arch=sm_35 -o simple.out simplePrintf.cu -rdc=true -lcudadevrt

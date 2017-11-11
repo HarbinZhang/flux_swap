@@ -136,7 +136,7 @@ __global__ void handle(double *g, double *r)
 	// which thread is this?
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 
-	init<<<1000, 1000>>>(g);
+	
 
 	running<<<1000, 1000>>>(g);
 
@@ -170,7 +170,8 @@ int main(int argc, char ** argv) {
     // dim3 dimBlock(ARRAY_SIZE, ARRAY_SIZE);
     // init<<<1, dimBlock>>>(d_array);
     // // init<<<1, ARRAY_SIZE*ARRAY_SIZE>>>(d_array);
-    // cudaDeviceSynchronize();
+    init<<<1000, 1000>>>(g);
+    cudaDeviceSynchronize();
 
 	cpu_startTime = clock();
 
@@ -184,7 +185,7 @@ int main(int argc, char ** argv) {
 
 	
 	cpu_endTime = clock();
-	cpu_ElapseTime = ((cpu_endTime - cpu_startTime)/CLOCKS_PER_SEC);
+	cpu_ElapseTime = (cpu_endTime - cpu_startTime);
 	printf("Time using in CPU is : %f\n", cpu_ElapseTime);
 
 

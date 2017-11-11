@@ -22,6 +22,28 @@ __global__ void init(double *g)
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
 }
 
+
+__device__ int partition(double *items, int left, int right, int pivotIndex)
+{
+        int pivot = items[pivotIndex];
+        int partitionIndex = left;
+
+        swap(items[pivotIndex],items[right]);
+        for(int i=left; i < right; i++) {
+                if(items[i]<pivot) {
+                		double temp = item[i];
+                		items[i] = items[partitionIndex];
+                		items[partitionIndex] = items[i];
+                        partitionIndex++;
+                }
+        }
+		double temp = item[right];
+		items[right] = items[partitionIndex];
+		items[partitionIndex] = items[right];
+        return partitionIndex;
+}
+
+
 __device__ int quickSelect(double *items, int first, int last, int k) {
     int pivot = partition(items, first, last);
     if (k < pivot-first+1) { //boundary was wrong
@@ -33,22 +55,7 @@ __device__ int quickSelect(double *items, int first, int last, int k) {
     }
 }
 
-__device__ int partition(double *items, int left, int right, int pivotIndex)
-{
-        int pivot = items[pivotIndex];
-        int partitionIndex = left;
 
-        swap(items[pivotIndex],items[right]);
-        for(int i=left; i < right; i++) {
-                if(items[i]<pivot) {
-                        swap(items[i],items[partitionIndex]);
-                        partitionIndex++;
-                }
-        }
-        swap(items[partitionIndex], items[right]);
-
-        return partitionIndex;
-}
 
 __global__ void running(double *g)
 {

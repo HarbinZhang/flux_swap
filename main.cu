@@ -22,16 +22,32 @@ __global__ void init(double *g)
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
 }
 
-__device__ quickSelect(double *items, int first, int last, int k) {
-    // int pivot = partition(items, first, last);
-    // if (k < pivot-first+1) { //boundary was wrong
-    //     return quickSelect(items, first, pivot, k);
-    // } else if (k > pivot-first+1) {//boundary was wrong
-    //     return quickSelect(items, pivot+1, last, k-pivot);
-    // } else {
-    //     return items[pivot];//index was wrong
-    // }
-    items[0] = items[0] + 1;
+__device__ int quickSelect(double *items, int first, int last, int k) {
+    int pivot = partition(items, first, last);
+    if (k < pivot-first+1) { //boundary was wrong
+        return quickSelect(items, first, pivot, k);
+    } else if (k > pivot-first+1) {//boundary was wrong
+        return quickSelect(items, pivot+1, last, k-pivot);
+    } else {
+        return items[pivot];//index was wrong
+    }
+}
+
+__device__ int partition(double *items, int left, int right, int pivotIndex)
+{
+        int pivot = items[pivotIndex];
+        int partitionIndex = left;
+
+        swap(items[pivotIndex],items[right]);
+        for(int i=left; i < right; i++) {
+                if(items[i]<pivot) {
+                        swap(items[i],items[partitionIndex]);
+                        partitionIndex++;
+                }
+        }
+        swap(items[partitionIndex], items[right]);
+
+        return partitionIndex;
 }
 
 __global__ void running(double *g)
@@ -52,9 +68,9 @@ __global__ void running(double *g)
 		arr[3] = g[index + ARRAY_SIZE];
 		arr[4] = g[index - ARRAY_SIZE];
 
-		quickSelect(arr, 0, 4, 2);
+		int temp = quickSelect(arr, 0, 4, 2);
 
-		g[index] = arr[0];
+		g[index] = temp;
 	}
 
 

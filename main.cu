@@ -59,7 +59,7 @@ __device__ double quick_select(double* input, int p, int r, int k)
 }
 
 
-__device__ void running(double *g)
+__global__ void running(double *g)
 {
 
 	// buffer

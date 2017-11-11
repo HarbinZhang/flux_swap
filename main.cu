@@ -26,7 +26,7 @@ __global__ void init(double *g)
 
 __device__ int partition(double* input, int p, int r)
 {
-    int pivot = input[r];
+    double pivot = input[r];
     
     while ( p < r )
     {
@@ -77,7 +77,7 @@ __global__ void running(double *g)
 		arr[3] = g[index + ARRAY_SIZE];
 		arr[4] = g[index - ARRAY_SIZE];
 
-		int temp = quick_select(arr, 0, 4, 2);
+		double temp = quick_select(arr, 0, 4, 2);
 
 		g[index] = temp;
 	}

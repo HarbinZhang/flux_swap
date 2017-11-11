@@ -13,6 +13,7 @@ __global__ void init(double *g)
 	// which thread is this?
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 	int i = blockIdx.x;
+	int k = blockIdx.y;
 	
 	int j = threadIdx.x;
 

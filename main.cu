@@ -137,15 +137,18 @@ __global__ void handle(double *g, double *r)
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 
 	
-	for(int i = 0; i < 10; i++){
-		running<<<1000, 1000>>>(g);
-		__syncthreads();
-	}
+	// for(int i = 0; i < 10; i++){
+	// 	running<<<1000, 1000>>>(g);
+	// 	__syncthreads();
+	// }
+
+	running<<<1000, 1000>>>(g);
+	cudaDeviceSynchronize();
 	
 	getResult<<<1000, 1000>>>(g, r);
-
+	cudaDeviceSynchronize();
 	
-	__syncthreads();
+
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
 }
 

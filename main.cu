@@ -139,6 +139,7 @@ __global__ void handle(double *g, double *r)
 	
 	for(int i = 0; i < 10; i++){
 		running<<<1000, 1000>>>(g);
+		__syncthreads();
 	}
 	
 	getResult<<<1000, 1000>>>(g, r);

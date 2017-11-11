@@ -15,13 +15,24 @@ __global__ void init(double *g)
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
 	// printf("Hello from sin %f, cos %f, thready %d\n", sinf(i), cosf(i-j), i*i+j);
-	g[i*ARRAY_SIZE + j] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
+	// g[i*ARRAY_SIZE + j] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
+	g[i*ARRAY_SIZE + j] = j;
 	
 	__syncthreads();
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
 }
 
-
+__device__ quickSelect(double *items, int first, int last, int k) {
+    // int pivot = partition(items, first, last);
+    // if (k < pivot-first+1) { //boundary was wrong
+    //     return quickSelect(items, first, pivot, k);
+    // } else if (k > pivot-first+1) {//boundary was wrong
+    //     return quickSelect(items, pivot+1, last, k-pivot);
+    // } else {
+    //     return items[pivot];//index was wrong
+    // }
+    items[0] = items[0] + 1;
+}
 
 __global__ void running(double *g)
 {
@@ -30,9 +41,24 @@ __global__ void running(double *g)
 	double arr[5];
 	int i = blockIdx.x;
 	int j = threadIdx.x;
-	// if()
+
+	int index = i * ARRAY_SIZE + j;
+	if(i == 0 || i == ARRAY_SIZE || j == 0 || j == ARRAY_SIZE){
+
+	}else{
+		arr[0] = g[index];
+		arr[1] = g[index + 1];
+		arr[2] = g[index - 1];
+		arr[3] = g[index + ARRAY_SIZE];
+		arr[4] = g[index - ARRAY_SIZE];
+
+		quickSelect(arr, 0, 4, 2);
+
+		g[index] = arr[0];
+	}
 
 
+	__syncthreads();
 	// get mediean
 }
 
@@ -44,7 +70,7 @@ __global__ void handle(double *g)
 
 	init<<<1000, 1000>>>(g);
 
-	// running<<<1000, 1000>>>(g);
+	running<<<1000, 1000>>>(g);
 
 
 

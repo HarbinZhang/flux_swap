@@ -76,7 +76,7 @@ __global__ void running(double *g)
 		arr[3] = g[index + ARRAY_SIZE];
 		arr[4] = g[index - ARRAY_SIZE];
 
-		int temp = quick_select(arr, 0, 4, 0);
+		int temp = quick_select(arr, 0, 4, 4);
 
 		g[index] = temp;
 	}
@@ -94,13 +94,29 @@ __global__ void getResult(double *g, double *r){
 	int j = threadIdx.x;
 	int index = i * ARRAY_SIZE + j;
 
-	// for (int s = )
+	for (int s = ARRAY_SIZE/2; s > 0; s >>= 1 ){
+		if(j < s){
+			g[index] += g[index + s];
+		}
+		__syncthreads();
+	}
+
+	for (int s = ARRAY_SIZE/2; s > 0; s >>= 1){
+		if(i < s && j == 0){
+			g[index] += g[index + s*ARRAY_SIZE];
+		}
+		__syncthreads();
+	}
+
+	if(i == 0 && j == 0){
+		printf("sum: %f\n", g[0]);
+	}
 
 }
 
 
 
-__global__ void handle(double *g)
+__global__ void handle(double *g, double *r)
 {
 	// which thread is this?
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
@@ -109,7 +125,7 @@ __global__ void handle(double *g)
 
 	running<<<1000, 1000>>>(g);
 
-
+	getResult<<<1000, 1000>>>(g, r);
 
 	
 	__syncthreads();
@@ -133,6 +149,8 @@ int main(int argc, char ** argv) {
     cudaMalloc((void **) &d_array, ARRAY_BYTES);
     cudaMemset((void *) d_array, 0, ARRAY_BYTES); 
 
+    double * r;
+    cudaMalloc((void **) &r, 3 * sizeof(double));
     // dim3 dimGrid(2, 2);
     // dim3 dimBlock(ARRAY_SIZE, ARRAY_SIZE);
     // init<<<1, dimBlock>>>(d_array);
@@ -142,7 +160,7 @@ int main(int argc, char ** argv) {
 	cpu_startTime = clock();
 
 
-	handle<<<1, 1>>>(d_array);
+	handle<<<1, 1>>>(d_array, r);
 	cudaDeviceSynchronize();
 
 

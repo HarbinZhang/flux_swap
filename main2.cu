@@ -19,8 +19,8 @@ __global__ void init(double *g)
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
 	// printf("Hello from sin %f, cos %f, thready %d\n", sinf(i), cosf(i-j), i*i+j);
-	g[i*ARRAY_SIZE + j] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
-	// g[i*ARRAY_SIZE + j] = j;
+	// g[i*ARRAY_SIZE + j] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
+	g[i*ARRAY_SIZE + j] = j;
 	
 	__syncthreads();
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
@@ -141,9 +141,9 @@ __global__ void handle(double *g, double *r)
 
 	
 
-	running<<<dim3(2,2), 1000>>>(g);
+	running<<<dim3(1000, 2, 2), 1000>>>(g);
 
-	getResult<<<dim3(2,2), 1000>>>(g, r);
+	getResult<<<dim3(1000, 2, 2), 1000>>>(g, r);
 
 	
 	__syncthreads();
@@ -173,8 +173,8 @@ int main(int argc, char ** argv) {
     // dim3 dimBlock(ARRAY_SIZE, ARRAY_SIZE);
     // init<<<1, dimBlock>>>(d_array);
     // // init<<<1, ARRAY_SIZE*ARRAY_SIZE>>>(d_array);
-    dim3 dimGrid(2,2);
-    init<<<dimGrid, 1000>>>(d_array);
+
+    init<<<dim3(1000, 2, 2), 1000>>>(d_array);
     cudaDeviceSynchronize();
 
 	cpu_startTime = clock();

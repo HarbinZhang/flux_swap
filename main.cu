@@ -143,10 +143,10 @@ __global__ void handle(double *g, double *r)
 	// }
 
 	running<<<1000, 1000>>>(g);
-	cudaDeviceSynchronize();
+	__syncthreads();
 	
 	getResult<<<1000, 1000>>>(g, r);
-	cudaDeviceSynchronize();
+	__syncthreads();
 	
 
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE

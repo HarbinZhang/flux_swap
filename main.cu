@@ -94,6 +94,18 @@ __global__ void getResult(double *g, double *r){
 	int j = threadIdx.x;
 	int index = i * ARRAY_SIZE + j;
 
+	if(i == 499 && j == 499){
+		printf("mid: %f\n", g[499 * ARRAY_SIZE + 499]);
+		r[1] = g[499 * ARRAY_SIZE + 499];
+	}
+
+	if(i == 17 && j == 31){
+		printf("17, 31 : %f\n", g[17*ARRAY_SIZE + 31]);
+		r[2] = g[17 * ARRAY_SIZE + 31];
+	}
+
+	__syncthreads();
+
 	for (int s = ARRAY_SIZE/2; s > 0; s >>= 1 ){
 		if(j < s){
 			g[index] += g[index + s];
@@ -110,11 +122,9 @@ __global__ void getResult(double *g, double *r){
 
 	if(i == 0 && j == 0){
 		printf("sum: %f\n", g[0]);
+		r[0] = g[0];
 	}
 
-	if(i == 499 && j === 499){
-		printf("mid: %f\n", g[499 * ARRAY_SIZE + 499]);
-	}
 
 }
 

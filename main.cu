@@ -23,44 +23,43 @@ __global__ void init(double *g)
 }
 
 
-__device__ int partition(double *items, int left, int right)
+__device__ int partition(double* input, int p, int r)
 {
-
-        int pivot = items[left];
-        int partitionIndex = left;
-
-       	double temp = items[right];
-		items[right] = items[partitionIndex];
-		items[partitionIndex] = temp;
-        for(int i=left; i < right; i++) {
-                if(items[i]<pivot) {
-                		temp = items[i];
-                		items[i] = items[partitionIndex];
-                		items[partitionIndex] =	temp;
-                        partitionIndex++;
-                }
+    int pivot = input[r];
+    
+    while ( p < r )
+    {
+        while ( input[p] < pivot )
+            p++;
+        
+        while ( input[r] > pivot )
+            r--;
+        
+        if ( input[p] == input[r] )
+            p++;
+        else if ( p < r ) {
+            double tmp = input[p];
+            input[p] = input[r];
+            input[r] = tmp;
         }
-		temp = items[right];
-		items[right] = items[partitionIndex];
-		items[partitionIndex] = temp;
-        return partitionIndex;
-}
-
-
-__device__ int quickSelect(double *items, int first, int last, int k) {
-    int pivot = partition(items, first, last);
-    if (k < pivot-first+1) { //boundary was wrong
-        return quickSelect(items, first, pivot, k);
-    } else if (k > pivot-first+1) {//boundary was wrong
-        return quickSelect(items, pivot+1, last, k-pivot);
-    } else {
-        return items[pivot];//index was wrong
     }
+    
+    return r;
 }
 
 
+__device__ double quick_select(double* input, int p, int r, int k)
+{
+    if ( p == r ) return input[p];
+    int j = partition(input, p, r);
+    int length = j - p + 1;
+    if ( length == k ) return input[j];
+    else if ( k < length ) return quick_select(input, p, j - 1, k);
+    else  return quick_select(input, j + 1, r, k - length);
+}
 
-__global__ void running(double *g)
+
+__device__ void running(double *g)
 {
 
 	// buffer
@@ -78,7 +77,7 @@ __global__ void running(double *g)
 		arr[3] = g[index + ARRAY_SIZE];
 		arr[4] = g[index - ARRAY_SIZE];
 
-		int temp = quickSelect(arr, 0, 4, 2);
+		int temp = quick_select(arr, 0, 4, 0);
 
 		g[index] = temp;
 	}
@@ -87,6 +86,12 @@ __global__ void running(double *g)
 	__syncthreads();
 	// get mediean
 }
+
+
+__device__ double getResult(double *g, double *r){
+
+}
+
 
 
 __global__ void handle(double *g)

@@ -66,9 +66,8 @@ __global__ void running(double *g)
 	double arr[5];
 	int i = blockIdx.x;
 	int j = threadIdx.x;
-
 	int index = i * ARRAY_SIZE + j;
-	if(i == 0 || i == ARRAY_SIZE || j == 0 || j == ARRAY_SIZE){
+	if(i == 0 || i == ARRAY_SIZE - 1  || j == 0 || j == ARRAY_SIZE - 1){
 
 	}else{
 		arr[0] = g[index];
@@ -88,9 +87,16 @@ __global__ void running(double *g)
 }
 
 
-// __device__ double getResult(double *g, double *r){
 
-// }
+
+__global__ void getResult(double *g, double *r){
+	int i = blockIdx.x;
+	int j = threadIdx.x;
+	int index = i * ARRAY_SIZE + j;
+
+	// for (int s = )
+
+}
 
 
 

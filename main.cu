@@ -23,9 +23,10 @@ __global__ void init(double *g)
 }
 
 
-__device__ int partition(double *items, int left, int right, int pivotIndex)
+__device__ int partition(double *items, int left, int right)
 {
-        int pivot = items[pivotIndex];
+
+        int pivot = items[left];
         int partitionIndex = left;
 
        	double temp = items[right];
@@ -33,13 +34,13 @@ __device__ int partition(double *items, int left, int right, int pivotIndex)
 		items[partitionIndex] = temp;
         for(int i=left; i < right; i++) {
                 if(items[i]<pivot) {
-                		double temp = items[i];
+                		temp = items[i];
                 		items[i] = items[partitionIndex];
                 		items[partitionIndex] =	temp;
                         partitionIndex++;
                 }
         }
-		double temp = items[right];
+		temp = items[right];
 		items[right] = items[partitionIndex];
 		items[partitionIndex] = temp;
         return partitionIndex;

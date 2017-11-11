@@ -16,8 +16,8 @@ __global__ void init(double *g)
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
 	// printf("Hello from sin %f, cos %f, thready %d\n", sinf(i), cosf(i-j), i*i+j);
-	// g[i*ARRAY_SIZE + j] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
-	g[i*ARRAY_SIZE + j] = j;
+	g[i*ARRAY_SIZE + j] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
+	// g[i*ARRAY_SIZE + j] = j;
 	
 	__syncthreads();
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE

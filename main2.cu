@@ -13,7 +13,7 @@ __global__ void init(double *g)
 	// which thread is this?
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 	int i = blockIdx.x;
-	int 
+	
 	int j = threadIdx.x;
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;

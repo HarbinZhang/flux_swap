@@ -15,8 +15,8 @@ __global__ void init(double *g)
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
 	// printf("Hello from sin %f, cos %f, thready %d\n", sinf(i), cosf(i-j), i*i+j);
-	// g[i*ARRAY_SIZE + j] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
-	g[i*ARRAY_SIZE + j] = j;
+	g[i*ARRAY_SIZE + j] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
+	// g[i*ARRAY_SIZE + j] = j;
 	
 	__syncthreads();
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
@@ -76,7 +76,7 @@ __global__ void running(double *g)
 		arr[3] = g[index + ARRAY_SIZE];
 		arr[4] = g[index - ARRAY_SIZE];
 
-		int temp = quick_select(arr, 0, 4, 4);
+		int temp = quick_select(arr, 0, 4, 2);
 
 		g[index] = temp;
 	}
@@ -110,6 +110,10 @@ __global__ void getResult(double *g, double *r){
 
 	if(i == 0 && j == 0){
 		printf("sum: %f\n", g[0]);
+	}
+
+	if(i == 499 && j === 499){
+		printf("mid: %f\n", g[499 * ARRAY_SIZE + 499]);
 	}
 
 }

@@ -88,9 +88,9 @@ __device__ void running(double *g)
 }
 
 
-__device__ double getResult(double *g, double *r){
+// __device__ double getResult(double *g, double *r){
 
-}
+// }
 
 
 

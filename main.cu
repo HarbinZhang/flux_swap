@@ -2,7 +2,7 @@
 #include <math.h>
 
 #define NUM_THREADS 10000
-#define ARRAY_SIZE  5
+#define ARRAY_SIZE  1000
 
 #define BLOCK_WIDTH 1000
 
@@ -10,16 +10,50 @@ __global__ void init(double *g)
 {
 	// which thread is this?
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
-	int i = threadIdx.x;
-	int j = threadIdx.y;
+	int i = blockIdx.x;
+	int j = threadIdx.x;
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
-	printf("Hello from sin %f, cos %f, thready %d\n", sinf(i), cosf(i-j), i*i+j);
+	// printf("Hello from sin %f, cos %f, thready %d\n", sinf(i), cosf(i-j), i*i+j);
 	g[i*ARRAY_SIZE + j] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
 	
 	__syncthreads();
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
 }
+
+
+
+__global__ void running(double *g)
+{
+
+	// buffer
+	double arr[5];
+	int i = blockIdx.x;
+	int j = threadIdx.x;
+	// if()
+
+
+	// get mediean
+}
+
+
+__global__ void handle(double *g)
+{
+	// which thread is this?
+	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
+
+	init<<<1000, 1000>>>(g);
+
+	// running<<<1000, 1000>>>(g);
+
+
+
+	
+	__syncthreads();
+	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
+}
+
+
 
 
 int main(int argc, char ** argv) {
@@ -29,18 +63,25 @@ int main(int argc, char ** argv) {
  
     clock_t cpu_startTime, cpu_endTime;
     double cpu_ElapseTime=0;
-	cpu_startTime = clock();
+	
 
     // declare, allocate, and zero out GPU memory
     double * d_array;
     cudaMalloc((void **) &d_array, ARRAY_BYTES);
     cudaMemset((void *) d_array, 0, ARRAY_BYTES); 
 
-    dim3 dimGrid(2, 2);
-    dim3 dimBlock(ARRAY_SIZE, ARRAY_SIZE);
-    init<<<1, dimBlock>>>(d_array);
-    // init<<<1, ARRAY_SIZE*ARRAY_SIZE>>>(d_array);
-    cudaDeviceSynchronize();
+    // dim3 dimGrid(2, 2);
+    // dim3 dimBlock(ARRAY_SIZE, ARRAY_SIZE);
+    // init<<<1, dimBlock>>>(d_array);
+    // // init<<<1, ARRAY_SIZE*ARRAY_SIZE>>>(d_array);
+    // cudaDeviceSynchronize();
+
+	cpu_startTime = clock();
+
+
+	handle<<<1, 1>>>(d_array);
+	cudaDeviceSynchronize();
+
 
 
     cudaMemcpy(h_array, d_array, ARRAY_BYTES, cudaMemcpyDeviceToHost);
@@ -52,8 +93,8 @@ int main(int argc, char ** argv) {
 
 
     printf("{ ");
-    for (int i = 0; i < ARRAY_SIZE; i++)  {
-    	for (int j = 0; j < ARRAY_SIZE; j++)
+    for (int i = 0; i < 5; i++)  {
+    	for (int j = 0; j < 5; j++)
     		{ printf("%f ", h_array[i][j]); }
     	printf("\n");
     }

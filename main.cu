@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <ctime>
 
 #define NUM_THREADS 10000
 #define ARRAY_SIZE  1000

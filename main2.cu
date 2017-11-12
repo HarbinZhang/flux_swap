@@ -20,8 +20,8 @@ __global__ void init(double *g)
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
 	printf("Hello from sin %f, cos %f, thready %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
-	printf("hi blockDim %f \t %f \t %f \t", blockDim.x, blockDim.y, blockDim.z);
-	printf("hi threadIdx %f \t%f \t%f \t", threadIdx.x, threadIdx.y, threadIdx.z);
+	printf("hi blockDim %f \t %f \t %f \n", blockDim.x, blockDim.y, blockDim.z);
+	printf("hi threadIdx %f \t%f \t%f \n", threadIdx.x, threadIdx.y, threadIdx.z);
 	// g[i*ARRAY_SIZE + j + y*BLOCK_SIZE*X + x*i*ARRAY_SIZE] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
 	// g[i*ARRAY_SIZE + j + y*BLOCK_SIZE*X + x*i*ARRAY_SIZE] = j;
 	g[m * ARRAY_SIZE * X + n] = n;

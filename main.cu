@@ -137,13 +137,13 @@ __global__ void handle(double *g, double *r)
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 
 	
-	// for(int i = 0; i < 10; i++){
-	// 	running<<<1000, 1000>>>(g);
-	// 	__syncthreads();
-	// }
+	for(int i = 0; i < 1; i++){
+	 	running<<<1000, 1000>>>(g);
+		__syncthreads();
+	}
 
-	running<<<1000, 1000>>>(g);
-	__syncthreads();
+	// running<<<1000, 1000>>>(g);
+	// __syncthreads();
 	
 	getResult<<<1000, 1000>>>(g, r);
 	__syncthreads();

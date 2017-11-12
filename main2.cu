@@ -3,7 +3,7 @@
 #include <ctime>
 
 #define ARRAY_SIZE 1000
-#define X 2
+#define X 1
 #define Y X
 #define N ARRAY_SIZE*X
 
@@ -154,6 +154,10 @@ __global__ void handle(double *g, double *r)
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 
 	
+	for(int i = 0; i < 10; i++){
+		running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
+		__syncthreads();
+	}	
 
 	running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
 

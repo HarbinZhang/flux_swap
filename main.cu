@@ -89,13 +89,13 @@ __global__ void running(double *g)
 
 
 
-__device__ void getSum(double *g, double*r){
+__global__ void getSum(double *g, double*r){
 	int i = threadIdx.x;
 	int index = i * ARRAY_SIZE;	
 
 	extern __shared__ float sdata[];
 
-	sdata[i] = g[i];
+	sdata[i] = g[index];
 
 	__syncthreads();
 
@@ -153,20 +153,21 @@ __global__ void getResult(double *g, double *r){
 	__syncthreads();
 
 
-	getSum<<<1, ARRAY_SIZE>>>(g, r);
+	
+// getSum<<<1, ARRAY_SIZE, ARRAY_SIZE*sizeof(double)>>>(g, r);
 
-	// for (int s = ARRAY_SIZE/2; s > 0; s >>= 1){
-	// 	if(i < s && j == 0){
-	// 		g[index] += g[index + s*ARRAY_SIZE];
-	// 	}
-	// 	__syncthreads();
-	// }
 
-	// if(i == 0 && j == 0){
-	// 	printf("sum: %f\n", g[0]);
-	// 	r[0] = g[0];
-	// }
+	for (int s = ARRAY_SIZE/2; s > 0; s >>= 1){
+		if(i < s && j == 0){
+			g[index] += g[index + s*ARRAY_SIZE];
+		}
+		__syncthreads();
+	}
 
+	if(i == 0 && j == 0){
+		printf("sum: %f\n", g[0]);
+		r[0] = g[0];
+	}
 
 }
 
@@ -186,7 +187,7 @@ __global__ void handle(double *g, double *r)
 	// running<<<1000, 1000>>>(g);
 	// __syncthreads();
 	
-	getResult<<<1000, 1000>>>(g, r);
+	getResult<<<1000, 1000, ARRAY_SIZE * sizeof(double)>>>(g, r);
 	__syncthreads();
 	
 

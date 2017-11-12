@@ -205,6 +205,7 @@ int main(int argc, char ** argv) {
     clock_t cpu_startTime, cpu_endTime;
     double cpu_ElapseTime=0;
 	
+    printf("running on version 1: 1000 \n");
 
     // declare, allocate, and zero out GPU memory
     double * d_array;

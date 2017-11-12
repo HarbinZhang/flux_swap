@@ -77,8 +77,9 @@ __global__ void running(double *g)
 	int index = m * ARRAY_SIZE * X + n;
 
 	// if(i == 0 || i == ARRAY_SIZE - 1  || j == 0 || j == ARRAY_SIZE - 1){
-	if( (y == 0 && i == 0) || ( y == Y-1 && i == ARRAY_SIZE - 1) ||
-		(x == 0 && j == 0) || ( x == X-1 && j == ARRAY_SIZE - 1)){
+	// if( (y == 0 && i == 0) || ( y == Y-1 && i == ARRAY_SIZE - 1) ||
+	// 	(x == 0 && j == 0) || ( x == X-1 && j == ARRAY_SIZE - 1)){
+	if(m == 0 || m == X*ARRAY_SIZE - 1 || n == 0 || n == Y*ARRAY_SIZE - 1){
 
 	}else{
 		arr[0] = g[index];

@@ -3,7 +3,7 @@
 #include <ctime>
 
 #define ARRAY_SIZE  5
-#define X 2
+#define X 4
 #define Y X
 
 
@@ -19,11 +19,12 @@ __global__ void init(double *g)
 
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
-	// printf("Hello from sin %d, cos %d, thready %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
-	// printf("hi blockDim %d \t %d \t %d \n", blockDim.x, blockDim.y, blockDim.z);
-	// printf("hi threadIdx %d \t%d \t%d \n", threadIdx.x, threadIdx.y, threadIdx.z);
-	g[m * ARRAY_SIZE * X + n] = sinf(m*m + n)*sinf(m*m + n) + cosf(m - n);
-	// g[m * ARRAY_SIZE * X + n] = n*1.0;
+	printf("Hello from sin %f, cos %f, thready %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
+	printf("hi blockDim %f \t %f \t %f \n", blockDim.x, blockDim.y, blockDim.z);
+	printf("hi threadIdx %f \t%f \t%f \n", threadIdx.x, threadIdx.y, threadIdx.z);
+	// g[i*ARRAY_SIZE + j + y*BLOCK_SIZE*X + x*i*ARRAY_SIZE] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
+	// g[i*ARRAY_SIZE + j + y*BLOCK_SIZE*X + x*i*ARRAY_SIZE] = j;
+	g[m * ARRAY_SIZE * X + n] = n;
 	
 	__syncthreads();
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
@@ -137,7 +138,7 @@ __global__ void getResult(double *g, double *r){
 		__syncthreads();
 	}
 
-	if(m == 0 && n == 0){
+	if(i == 0 && j == 0){
 		printf("sum: %f\n", g[0]);
 		r[0] = g[0];
 	}
@@ -187,7 +188,7 @@ int main(int argc, char ** argv) {
     // init<<<1, dimBlock>>>(d_array);
     // // init<<<1, ARRAY_SIZE*ARRAY_SIZE>>>(d_array);
 
-    init<<<dim3(ARRAY_SIZE,X,Y), ARRAY_SIZE>>>(d_array);
+    init<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(d_array);
     cudaDeviceSynchronize();
 
 	cpu_startTime = clock();
@@ -207,8 +208,8 @@ int main(int argc, char ** argv) {
 
 
     printf("{ ");
-    for (int i = 0; i < 10; i++)  {
-    	for (int j = 0; j < 10; j++)
+    for (int i = 0; i < 5; i++)  {
+    	for (int j = 0; j < 5; j++)
     		{ printf("%f ", h_array[i][j]); }
     	printf("\n");
     }

@@ -95,6 +95,10 @@ __global__ void getResult(double *g, double *r){
 	int j = threadIdx.x;
 	int index = i * ARRAY_SIZE + j;
 
+	extern __shared__ float sdata[];
+
+	sdata[j] = g[index];
+
 	if(i == 499 && j == 499){
 		printf("mid: %f\n", g[499 * ARRAY_SIZE + 499]);
 		r[1] = g[499 * ARRAY_SIZE + 499];
@@ -107,12 +111,21 @@ __global__ void getResult(double *g, double *r){
 
 	__syncthreads();
 
+
+
 	for (int s = ARRAY_SIZE/2; s > 0; s >>= 1 ){
 		if(j < s){
-			g[index] += g[index + s];
+			sdata[j] += sdata[j + s];
 		}
 		__syncthreads();
 	}
+
+	if(j == 0){
+		g[index] = sdata[j];
+	}
+
+	__syncthreads();
+	
 
 	for (int s = ARRAY_SIZE/2; s > 0; s >>= 1){
 		if(i < s && j == 0){

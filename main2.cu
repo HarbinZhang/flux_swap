@@ -19,7 +19,7 @@ __global__ void init(double *g)
 
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
-	printf("Hello from sin %f, cos %f, thready %d\n", m, n, i);
+	printf("Hello from sin %f, cos %f, thready %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
 	// g[i*ARRAY_SIZE + j + y*BLOCK_SIZE*X + x*i*ARRAY_SIZE] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
 	// g[i*ARRAY_SIZE + j + y*BLOCK_SIZE*X + x*i*ARRAY_SIZE] = j;
 	g[m * ARRAY_SIZE * X + n] = n;

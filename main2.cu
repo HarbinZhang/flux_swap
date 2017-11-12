@@ -2,25 +2,27 @@
 #include <math.h>
 #include <ctime>
 
-#define NUM_THREADS 10000
-#define ARRAY_SIZE  2000
+#define ARRAY_SIZE  1000
+#define X 2
+#define Y X
 
-#define BLOCK_WIDTH 1000
-#define 
 
 __global__ void init(double *g)
 {
 	// which thread is this?
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 	int i = blockIdx.x;
-	int k = blockIdx.y;
-	
 	int j = threadIdx.x;
+
+	int m = i + blockIdx.z * ARRAY_SIZE;
+	int n = j + blockIdx.y * ARRAY_SIZE;
+
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
 	// printf("Hello from sin %f, cos %f, thready %d\n", sinf(i), cosf(i-j), i*i+j);
-	// g[i*ARRAY_SIZE + j] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
-	g[i*ARRAY_SIZE + j] = j;
+	// g[i*ARRAY_SIZE + j + y*BLOCK_SIZE*X + x*i*ARRAY_SIZE] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
+	// g[i*ARRAY_SIZE + j + y*BLOCK_SIZE*X + x*i*ARRAY_SIZE] = j;
+	g[m * ARRAY_SIZE * X + n] = n;
 	
 	__syncthreads();
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
@@ -70,15 +72,20 @@ __global__ void running(double *g)
 	double arr[5];
 	int i = blockIdx.x;
 	int j = threadIdx.x;
-	int index = i * ARRAY_SIZE + j;
-	if(i == 0 || i == ARRAY_SIZE - 1  || j == 0 || j == ARRAY_SIZE - 1){
+	int m = i + blockIdx.z * ARRAY_SIZE;
+	int n = j + blockIdx.y * ARRAY_SIZE;
+	int index = m * ARRAY_SIZE * X + n;
+
+	// if(i == 0 || i == ARRAY_SIZE - 1  || j == 0 || j == ARRAY_SIZE - 1){
+	if( (y == 0 && i == 0) || ( y == Y-1 && i == ARRAY_SIZE - 1) ||
+		(x == 0 && j == 0) || ( x == X-1 && j == ARRAY_SIZE - 1)){
 
 	}else{
 		arr[0] = g[index];
 		arr[1] = g[index + 1];
 		arr[2] = g[index - 1];
-		arr[3] = g[index + ARRAY_SIZE];
-		arr[4] = g[index - ARRAY_SIZE];
+		arr[3] = g[index + ARRAY_SIZE * X];
+		arr[4] = g[index - ARRAY_SIZE * X];
 
 		double temp = quick_select(arr, 0, 4, 2);
 
@@ -96,14 +103,18 @@ __global__ void running(double *g)
 __global__ void getResult(double *g, double *r){
 	int i = blockIdx.x;
 	int j = threadIdx.x;
-	int index = i * ARRAY_SIZE + j;
+	int m = i + blockIdx.z * ARRAY_SIZE;
+	int n = j + blockIdx.y * ARRAY_SIZE;
+	int index = m * ARRAY_SIZE * X + n;
 
-	if(i == 499 && j == 499){
-		printf("mid: %f\n", g[499 * ARRAY_SIZE + 499]);
-		r[1] = g[499 * ARRAY_SIZE + 499];
+
+	int mid = 500 * X - 1;
+	if(m == mid && n == mid){
+		printf("mid: %f\n", g[mid * ARRAY_SIZE + mid]);
+		r[1] = g[mid * ARRAY_SIZE + mid];
 	}
 
-	if(i == 17 && j == 31){
+	if(m == 17 && n == 31){
 		printf("17, 31 : %f\n", g[17*ARRAY_SIZE + 31]);
 		r[2] = g[17 * ARRAY_SIZE + 31];
 	}

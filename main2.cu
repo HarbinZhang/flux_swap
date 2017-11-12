@@ -2,7 +2,7 @@
 #include <math.h>
 #include <ctime>
 
-#define ARRAY_SIZE  5
+#define ARRAY_SIZE  3
 #define X 2
 #define Y X
 
@@ -22,6 +22,7 @@ __global__ void init(double *g)
 	// printf("Hello from sin %d, cos %d, thready %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
 	// printf("hi blockDim %d \t %d \t %d \n", blockDim.x, blockDim.y, blockDim.z);
 	// printf("hi threadIdx %d \t%d \t%d \n", threadIdx.x, threadIdx.y, threadIdx.z);
+	printf("hi m: %d   n: %d  index: %d  value:%f\n", m, n, m * ARRAY_SIZE * X + n, sinf(m*m + n)*sinf(m*m + n) + cosf(m - n));
 	g[m * ARRAY_SIZE * X + n] = sinf(m*m + n)*sinf(m*m + n) + cosf(m - n);
 	// g[m * ARRAY_SIZE * X + n] = n*1.0;
 	
@@ -168,7 +169,7 @@ __global__ void handle(double *g, double *r)
 
 int main(int argc, char ** argv) {
     // declare and allocate host memory
-    double h_array[ARRAY_SIZE][ARRAY_SIZE];
+    double h_array[ARRAY_SIZE*ARRAY_SIZE];
     const int ARRAY_BYTES = ARRAY_SIZE * ARRAY_SIZE * sizeof(double);
  
     clock_t cpu_startTime, cpu_endTime;
@@ -193,7 +194,7 @@ int main(int argc, char ** argv) {
 	cpu_startTime = clock();
 
 
-	handle<<<1, 1>>>(d_array, r);
+	// handle<<<1, 1>>>(d_array, r);
 	cudaDeviceSynchronize();
 
 
@@ -208,8 +209,8 @@ int main(int argc, char ** argv) {
 
     printf("{ ");
     for (int i = 0; i < 10; i++)  {
-    	for (int j = 0; j < 10; j++)
-    		{ printf("%f ", h_array[i][j]); }
+	for(int j = 0; j < 10; j++)
+    		{ printf("%f ", h_array[i*10 +j]); }
     	printf("\n");
     }
    

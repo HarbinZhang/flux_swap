@@ -2,7 +2,7 @@
 #include <math.h>
 #include <ctime>
 
-#define ARRAY_SIZE  1000
+#define ARRAY_SIZE  5
 #define X 2
 #define Y X
 
@@ -19,7 +19,7 @@ __global__ void init(double *g)
 
 
 	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
-	// printf("Hello from sin %f, cos %f, thready %d\n", sinf(i), cosf(i-j), i*i+j);
+	printf("Hello from sin %f, cos %f, thready %d\n", m, n, i);
 	// g[i*ARRAY_SIZE + j + y*BLOCK_SIZE*X + x*i*ARRAY_SIZE] = sinf(i*i + j)*sinf(i*i + j) + cosf(i - j);
 	// g[i*ARRAY_SIZE + j + y*BLOCK_SIZE*X + x*i*ARRAY_SIZE] = j;
 	g[m * ARRAY_SIZE * X + n] = n;
@@ -153,9 +153,9 @@ __global__ void handle(double *g, double *r)
 
 	
 
-	running<<<dim3(1000, 2, 2), 1000>>>(g);
+	running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
 
-	getResult<<<dim3(1000, 2, 2), 1000>>>(g, r);
+	getResult<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, r);
 
 	
 	__syncthreads();
@@ -186,7 +186,7 @@ int main(int argc, char ** argv) {
     // init<<<1, dimBlock>>>(d_array);
     // // init<<<1, ARRAY_SIZE*ARRAY_SIZE>>>(d_array);
 
-    init<<<dim3(1000, 2, 2), 1000>>>(d_array);
+    init<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(d_array);
     cudaDeviceSynchronize();
 
 	cpu_startTime = clock();

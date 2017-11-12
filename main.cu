@@ -141,14 +141,21 @@ __global__ void getResult(double *g, double *r){
 
 	for (int s = ARRAY_SIZE/2; s > 0; s >>= 1 ){
 		if(j < s){
-			sdata[j] += sdata[j + s];
+			g[index] += g[index + s];
 		}
 		__syncthreads();
 	}
 
-	if(j == 0){
-		g[index] = sdata[j];
-	}
+	// for (int s = ARRAY_SIZE/2; s > 0; s >>= 1 ){
+	// 	if(j < s){
+	// 		sdata[j] += sdata[j + s];
+	// 	}
+	// 	__syncthreads();
+	// }
+
+	// if(j == 0){
+	// 	g[index] = sdata[j];
+	// }
 
 	__syncthreads();
 

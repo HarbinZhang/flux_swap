@@ -150,7 +150,7 @@ __global__ void getResult(double *g, double *r){
 	__shared__ double sdata[ARRAY_SIZE];
 
 	sdata[j] = g[index];
-	__syncthreads();
+	//__syncthreads();
 
 	int mid = 500 * X;
 	if(m == mid && n == mid){
@@ -225,9 +225,11 @@ __global__ void handle(double *g, double *r)
 
 	//running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
 
-	getResult<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, r);
+	// getResult<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, r);
 
 	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(g, r);
+
+	getRes<<<1, X*Y>>>(r);
 	
 	__syncthreads();
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE

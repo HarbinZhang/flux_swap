@@ -3,7 +3,7 @@
 #include <ctime>
 
 #define ARRAY_SIZE 1000
-#define X 2
+#define X 1
 #define Y X
 #define N ARRAY_SIZE*X
 
@@ -147,26 +147,33 @@ __global__ void getResult(double *g, double *r){
 	int m = i + blockIdx.z * ARRAY_SIZE;
 	int n = j + blockIdx.y * ARRAY_SIZE;
 	int index = m * ARRAY_SIZE * X + n;
+	__shared__ double sdata[ARRAY_SIZE];
 
+	sdata[j] = g[index];
+	__syncthreads();
 
 	int mid = 500 * X;
 	if(m == mid && n == mid){
-		printf("mid: %f\n", g[mid * ARRAY_SIZE + mid]);
-		r[1] = g[mid * ARRAY_SIZE + mid];
+		printf("mid: %f\n", g[mid * N + mid]);
+		r[1] = g[mid * N + mid];
 	}
 
 	if(m == 17 && n == 31){
-		printf("17, 31 : %f\n", g[17*ARRAY_SIZE + 31]);
-		r[0] = g[17 * ARRAY_SIZE + 31];
+		printf("17, 31 : %f\n", g[17*N + 31]);
+		r[0] = g[17 * N + 31];
 	}
 
 	__syncthreads();
 
 	for (int s = 1024/2; s > 0; s >>= 1 ){
 		if(j < s && j + s < ARRAY_SIZE){
-			g[index] += g[index + s];
+			sdata[j] += sdata[j + s];
 		}
 		__syncthreads();
+	}
+
+	if(j == 0){
+		g[index] = sdata[0];
 	}
 
 	__syncthreads();
@@ -186,16 +193,33 @@ __global__ void getResult(double *g, double *r){
 	// }
 }
 
+__global__ void getRes(double *r){
+	__shared__ double sdata[X*Y];
+	int i = threadIdx.x;
+	sdata[i] = r[i+2];
+	__syncthreads();
 
+	for(int s = X*Y/2; s > 0; s >>=1){
+		if(i < s){
+			sdata[i] += sdata[i + s];
+		}
+		__syncthreads();
+	}
+	if(i == 0){
+		r[2] = sdata[0];
+	}
+	__syncthreads();
+}
 
 __global__ void handle(double *g, double *r)
 {
 	// which thread is this?
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 
+
 	
 	for(int i = 0; i < 10; i++){
-		running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
+		 running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
 		__syncthreads();
 	}	
 

@@ -281,8 +281,9 @@ int main(int argc, char ** argv) {
 	cudaDeviceSynchronize();
 
 
+	double res[3];
 
-    cudaMemcpy(h_array, d_array, ARRAY_BYTES, cudaMemcpyDeviceToHost);
+    cudaMemcpy(res, r, 3*sizeof(double), cudaMemcpyDeviceToHost);
 
 	
 	cpu_endTime = clock();
@@ -297,7 +298,9 @@ int main(int argc, char ** argv) {
     //	printf("\n");
     // }
    
-    printf("}\n");
+    // printf("}\n");
+
+    printf("Sum From CPU: %f \n", res[2]);
 
 
     cudaFree(d_array);

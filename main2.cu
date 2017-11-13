@@ -136,12 +136,11 @@ __global__ void getSum(double *getSumArray, double*r){
 		r[2 + blockIdx.y * X + blockIdx.z] = sdata[0];	
 		printf("sum: %f\n", sdata[0]);
 	}
-
 	__syncthreads();
 }
 
 
-__global__ void getResult(double *g, double *r, double *getSumArray){
+__global__ void getRowSum(double *g, double *r, double *getSumArray){
 	int i = blockIdx.x;
 	int j = threadIdx.x;
 	int m = i + blockIdx.z * ARRAY_SIZE;
@@ -152,16 +151,16 @@ __global__ void getResult(double *g, double *r, double *getSumArray){
 	sdata[j] = g[index];
 	//__syncthreads();
 
-	int mid = 500 * X;
+	int mid = ARRAY_SIZE/2 * X;
 	if(m == mid && n == mid){
 		printf("mid: %f\n", g[mid * N + mid]);
 		r[1] = g[mid * N + mid];
 	}
 
-	if(m == 17 && n == 31){
-		printf("17, 31 : %f\n", g[17*N + 31]);
-		r[0] = g[17 * N + 31];
-	}
+	// if(m == 17 && n == 31){
+	// 	printf("17, 31 : %f\n", g[17*N + 31]);
+	// 	r[0] = g[17 * N + 31];
+	// }
 
 	__syncthreads();
 
@@ -173,9 +172,9 @@ __global__ void getResult(double *g, double *r, double *getSumArray){
 	}
 
 	if(j == 0){
+		printf("sum from thread: %d is : %f \n", threadIdx.x, sdata[0]);
 		getSumArray[i + ARRAY_SIZE * (Y * blockIdx.z + blockIdx.y) ] = sdata[0];
 	}
-
 	__syncthreads();
 }
 
@@ -193,7 +192,6 @@ __global__ void getRes(double *r, double *cres){
 	}
 	if(i == 0){
 		cres[2] = sdata[0];
-		cres[1] = 2.3;
 
 	}
 	__syncthreads();
@@ -244,7 +242,7 @@ int main(int argc, char ** argv) {
     	}
     }
 
-    printf("A[N/2][N/2]: %f 	A[17][31]: %f \n", h_array[N/2*(N+1)],h_array[17*N+31]);
+    // printf("A[N/2][N/2]: %f 	A[17][31]: %f \n", h_array[N/2*(N+1)],h_array[17*N+31]);
 
     cudaMemcpy(d_array, h_array, ARRAY_BYTES, cudaMemcpyHostToDevice);
 
@@ -262,7 +260,7 @@ int main(int argc, char ** argv) {
 	handle<<<1, 1>>>(d_array);
 	cudaDeviceSynchronize();
 
-	getResult<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(d_array, r, getSumArray);
+	getRowSum<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(d_array, r, getSumArray);
 	cudaDeviceSynchronize();
 
 	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(getSumArray, r);

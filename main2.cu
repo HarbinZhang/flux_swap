@@ -102,10 +102,20 @@ __global__ void running(double *g)
 		arr[4] = g[index - ARRAY_SIZE * X];
 
 		//double temp = quick_select(arr, 0, 4, 2);
-		double temp = bubble_sort(arr, 0, 4, 2);
+		// double temp = bubble_sort(arr, 0, 4, 2);
+		for(int i = 0; i < 5; i++){
+			for(int j = i+1; j < 5; j ++){
+				if(arr[i] < arr[j]){
+					double temp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = temp;
+				}
+			}
+		}
+
 
 		__syncthreads();
-		g[index] = temp;
+		g[index] = arr[2];
 	}
 
 

@@ -273,7 +273,7 @@ int main(int argc, char ** argv) {
 
 	double res[2];
 	double sumRes;
-    cudaMemcpy(sumRes, cres, sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&sumRes, cres, sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(res, r, 2*sizeof(double), cudaMemcpyDeviceToHost);
 
 	

@@ -117,7 +117,7 @@ __global__ void running(double *g)
 
 __global__ void getSum(double *g, double*r){
 	int i = threadIdx.x;
-	int index = i * ARRAY_SIZE;	
+	int index = i + ARRAY_SIZE * (Y*blockIdx.z + blockIdx.y);	
 
 	__shared__ double sdata[ARRAY_SIZE];
 
@@ -141,7 +141,7 @@ __global__ void getSum(double *g, double*r){
 }
 
 
-__global__ void getResult(double *g, double *r){
+__global__ void getResult(double *g, double *r, double *getSumArray){
 	int i = blockIdx.x;
 	int j = threadIdx.x;
 	int m = i + blockIdx.z * ARRAY_SIZE;
@@ -173,24 +173,10 @@ __global__ void getResult(double *g, double *r){
 	}
 
 	if(j == 0){
-		g[index] = sdata[0];
+		getSumArray[i + ARRAY_SIZE * (Y * blockIdx.z + blockIdx.y) ] = sdata[0];
 	}
 
 	__syncthreads();
-	// getSum<<<dim3(1,X,Y), ARRAY_SIZE, ARRAY_SIZE*sizeof(double)>>>(g, r);
-	// getSum<<<1, ARRAY_SIZE>>>(g, r);
-
-	// for (int s = ARRAY_SIZE/2; s > 0; s >>= 1){
-	// 	if(i < s && j == 0){
-	// 		g[index] += g[index + s*ARRAY_SIZE];
-	// 	}
-	// 	__syncthreads();
-	// }
-
-	//if(m == 0 && n == 0){
-	// 	printf("sum: %f\n", g[0]);
-	// 	r[0] = g[0];
-	// }
 }
 
 __global__ void getRes(double *r){
@@ -211,28 +197,14 @@ __global__ void getRes(double *r){
 	__syncthreads();
 }
 
-__global__ void handle(double *g, double *r)
+__global__ void handle(double *g)
 {
-	// which thread is this?
-	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
-
-
-	
 	for(int i = 0; i < 10; i++){
 		 running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
-		__syncthreads();
+		// __syncthreads();
 	}	
 
 	//running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
-
-	// getResult<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, r);
-
-	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(g, r);
-
-	getRes<<<1, X*Y>>>(r);
-	
-	__syncthreads();
-	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
 }
 
 
@@ -256,7 +228,13 @@ int main(int argc, char ** argv) {
 
     double * r;
     cudaMalloc((void **) &r, (2+X*Y) * sizeof(double));
+
+    double * getSumArray;
+    cudaMalloc((void **) &getSumArray, X * Y * ARRAY_SIZE * sizeof(double));
     
+    double * cres;
+    cudaMalloc((void **) &cres, 3 * sizeof(double));
+  
 
     for(int i = 0; i < X*ARRAY_SIZE; i++){
     	for(int j = 0; j < Y*ARRAY_SIZE; j++){
@@ -279,13 +257,21 @@ int main(int argc, char ** argv) {
 	cpu_startTime = clock();
 
 
-	handle<<<1, 1>>>(d_array, r);
+	handle<<<1, 1>>>(d_array);
 	cudaDeviceSynchronize();
 
+	getResult<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(d_array, r, getSumArray);
+	cudaDeviceSynchronize();
+
+	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(getSumArray, r);
+	cudaDeviceSynchronize();
+
+	getRes<<<1, X*Y>>>(r, cres);
+	cudaDeviceSynchronize();
 
 	double res[3];
 
-    cudaMemcpy(res, r, 3*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(res, cres, 3*sizeof(double), cudaMemcpyDeviceToHost);
 
 	
 	cpu_endTime = clock();
@@ -306,6 +292,8 @@ int main(int argc, char ** argv) {
 
 
     cudaFree(d_array);
+    cudaFree(r);
+    cudaFree(cres);
 
 
 	return 0;

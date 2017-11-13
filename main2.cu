@@ -118,11 +118,12 @@ __global__ void getRowSum(double *g, double *r, double *getSumArray){
 
 	int mid = ARRAY_SIZE/2 * X;
 	if(m == mid && n == mid){
-		// printf("mid: %f\n", g[mid * N + mid]);
+		printf("mid: %f\n", sdata[]);
 		r[1] = sdata[j];
 	}
 
 	if(m == 17 && n == 31){
+		printf("17: %f\n", sdata[mid * N + mid]);
 		r[0] = sdata[j];
 	}
 
@@ -175,7 +176,7 @@ __global__ void getSum(double *getSumArray, double*r){
 	}
 
 	if(i == 0){
-		r[2 + blockIdx.y * X + blockIdx.z] = sdata[0];	
+		r[blockIdx.y * X + blockIdx.z] = sdata[0];	
 		printf("sum: %f\n", sdata[0]);
 	}
 	__syncthreads();
@@ -233,7 +234,10 @@ int main(int argc, char ** argv) {
     cudaMemset((void *) mid_array, 0, ARRAY_BYTES); 
 
     double * r;
-    cudaMalloc((void **) &r, (2+X*Y) * sizeof(double));
+    cudaMalloc((void **) &r, (2) * sizeof(double));
+
+    double * csum;
+    cudaMalloc((void **) &r, (X*Y) * sizeof(double));
 
     double * getSumArray;
     cudaMalloc((void **) &getSumArray, X * Y * ARRAY_SIZE * sizeof(double));
@@ -261,15 +265,16 @@ int main(int argc, char ** argv) {
 	getRowSum<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(mid_array, r, getSumArray);
 	cudaDeviceSynchronize();
 
-	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(getSumArray, r);
+	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(getSumArray, csum);
 	cudaDeviceSynchronize();
 
-	getRes<<<1, X*Y>>>(r, cres);
+	getRes<<<1, X*Y>>>(csum, cres);
 	cudaDeviceSynchronize();
 
 	double res[3];
 
-    cudaMemcpy(res, cres, 3*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(res[2], cres, sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(res, r, 2*sizeof(double), cudaMemcpyDeviceToHost);
 
 	
 

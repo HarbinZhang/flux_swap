@@ -110,7 +110,7 @@ __global__ void getResult(double *g, double *r){
 	int index = m * ARRAY_SIZE * X + n;
 
 
-	int mid = 500 * X - 1;
+	int mid = 500 * X;
 	if(m == mid && n == mid){
 		printf("mid: %f\n", g[mid * ARRAY_SIZE + mid]);
 		r[1] = g[mid * ARRAY_SIZE + mid];
@@ -158,7 +158,7 @@ __global__ void handle(double *g, double *r)
 		__syncthreads();
 	}	
 
-	running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
+	// running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
 
 	getResult<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, r);
 
@@ -196,6 +196,7 @@ int main(int argc, char ** argv) {
     	}
     }
 
+    printf("A[N/2][N/2]: %f 	A[17][31]: %f \n", h_array[N/2*(N+1)],h_array[17*N+31]);
 
     cudaMemcpy(d_array, h_array, ARRAY_BYTES, cudaMemcpyHostToDevice);
 

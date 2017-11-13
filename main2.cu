@@ -103,16 +103,18 @@ __global__ void running(double *g)
 
 		//double temp = quick_select(arr, 0, 4, 2);
 		// double temp = bubble_sort(arr, 0, 4, 2);
-		for(int i = 0; i < 5; i++){
-			for(int j = i+1; j < 5; j ++){
-				if(arr[i] < arr[j]){
-					double temp = arr[i];
-					arr[i] = arr[j];
-					arr[j] = temp;
+		__syncthreads();
+		
+		for(int i = 0; i < 4; i++){
+			for(int j = 0; j < 4 - i; j ++){
+				if(arr[j + i] < arr[j]){
+					double temp = arr[j];
+					arr[j] = arr[j+1];
+					arr[j+1] = temp;
 				}
 			}
 		}
-
+		
 
 		__syncthreads();
 		g[index] = arr[2];

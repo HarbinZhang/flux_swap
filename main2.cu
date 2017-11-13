@@ -118,7 +118,7 @@ __global__ void getRowSum(double *g, double *r, double *getSumArray){
 
 	int mid = ARRAY_SIZE/2 * X;
 	if(m == mid && n == mid){
-		printf("mid: %f\n", sdata[]);
+		printf("mid: %f\n", sdata[j]);
 		r[1] = sdata[j];
 	}
 
@@ -234,7 +234,7 @@ int main(int argc, char ** argv) {
     cudaMemset((void *) mid_array, 0, ARRAY_BYTES); 
 
     double * r;
-    cudaMalloc((void **) &r, (2) * sizeof(double));
+    cudaMalloc((void **) &r, 2 * sizeof(double));
 
     double * csum;
     cudaMalloc((void **) &r, (X*Y) * sizeof(double));
@@ -271,9 +271,9 @@ int main(int argc, char ** argv) {
 	getRes<<<1, X*Y>>>(csum, cres);
 	cudaDeviceSynchronize();
 
-	double res[3];
-
-    cudaMemcpy(res[2], cres, sizeof(double), cudaMemcpyDeviceToHost);
+	double res[2];
+	double sumRes;
+    cudaMemcpy(sumRes, cres, sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(res, r, 2*sizeof(double), cudaMemcpyDeviceToHost);
 
 	
@@ -292,7 +292,7 @@ int main(int argc, char ** argv) {
    
     // printf("}\n");
 
-    printf("Sum From CPU: %f \n", res[2]);
+    printf("Sum From CPU: %f \n", sumRes);
     printf("A[17][31] :  %f \n", res[0]);
     printf("A[mid][mid]: %f \n", res[1]);
 

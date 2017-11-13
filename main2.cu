@@ -115,13 +115,13 @@ __global__ void running(double *g)
 
 
 
-__global__ void getSum(double *g, double*r){
+__global__ void getSum(double *getSumArray, double*r){
 	int i = threadIdx.x;
 	int index = i + ARRAY_SIZE * (Y*blockIdx.z + blockIdx.y);	
 
 	__shared__ double sdata[ARRAY_SIZE];
 
-	sdata[i] = g[index];
+	sdata[i] = getSumArray[index];
 
 	__syncthreads();
 
@@ -179,7 +179,7 @@ __global__ void getResult(double *g, double *r, double *getSumArray){
 	__syncthreads();
 }
 
-__global__ void getRes(double *r){
+__global__ void getRes(double *r, double *cres){
 	__shared__ double sdata[X*Y];
 	int i = threadIdx.x;
 	sdata[i] = r[i+2];
@@ -192,7 +192,8 @@ __global__ void getRes(double *r){
 		__syncthreads();
 	}
 	if(i == 0){
-		r[2] = sdata[0];
+		cres[2] = sdata[0];
+
 	}
 	__syncthreads();
 }

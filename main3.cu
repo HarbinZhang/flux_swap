@@ -25,6 +25,7 @@ __global__ void init(double *g)
 	// printf("hi m: %d   n: %d  index: %d  value:%f\n", m, n, m * ARRAY_SIZE * X + n, sinf(m*m + n)*sinf(m*m + n) + cosf(m - n));
 	g[m * ARRAY_SIZE * X + n] = sinf(m*m + n)*sinf(m*m + n) + cosf(m - n);
 	// g[m * ARRAY_SIZE * X + n] = n*1.0;
+	
 	__syncthreads();
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
 }
@@ -68,7 +69,6 @@ __device__ double quick_select(double* input, int p, int r, int k)
 
 __global__ void running(double *g)
 {
-
 	// buffer
 	double arr[5];
 	int i = blockIdx.x;
@@ -77,6 +77,7 @@ __global__ void running(double *g)
 	int n = j + blockIdx.y * ARRAY_SIZE;
 	int index = m * ARRAY_SIZE * X + n;
 
+	__syncthreads();
 	// if(i == 0 || i == ARRAY_SIZE - 1  || j == 0 || j == ARRAY_SIZE - 1){
 	// if( (y == 0 && i == 0) || ( y == Y-1 && i == ARRAY_SIZE - 1) ||
 	// 	(x == 0 && j == 0) || ( x == X-1 && j == ARRAY_SIZE - 1)){
@@ -152,9 +153,8 @@ __global__ void handle(double *g, double *r)
 	// which thread is this?
 	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 
-	
 	for(int i = 0; i < 10; i++){
-		running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
+		running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE, ARRAY_SIZE*3*sizeof(double)>>>(g);
 		__syncthreads();
 	}	
 
@@ -173,7 +173,7 @@ __global__ void handle(double *g, double *r)
 int main(int argc, char ** argv) {
     // declare and allocate host memory
     double h_array[N*N];
-    const int ARRAY_BYTES = N*N*sizeof(double);
+    const int ARRAY_BYTES = N*N* sizeof(double);
  
     clock_t cpu_startTime, cpu_endTime;
     double cpu_ElapseTime=0;
@@ -188,24 +188,13 @@ int main(int argc, char ** argv) {
 
     double * r;
     cudaMalloc((void **) &r, 3 * sizeof(double));
-    
-
-    for(int i = 0; i < X*ARRAY_SIZE; i++){
-    	for(int j = 0; j < Y*ARRAY_SIZE; j++){
-    		h[i*N + j] = sin(x*x + j) * sin(x*x + j) + cos(i - j);
-    	}
-    }
-
-
-    cudaMemcpy(d_array, h_array, ARRAY_BYTES, cudaMemcpyHostToDevice);
-
     // dim3 dimGrid(2, 2);
     // dim3 dimBlock(ARRAY_SIZE, ARRAY_SIZE);
     // init<<<1, dimBlock>>>(d_array);
     // // init<<<1, ARRAY_SIZE*ARRAY_SIZE>>>(d_array);
 
-    // init<<<dim3(ARRAY_SIZE,X,Y), ARRAY_SIZE>>>(d_array);
-    // cudaDeviceSynchronize();
+    init<<<dim3(ARRAY_SIZE,X,Y), ARRAY_SIZE>>>(d_array);
+    cudaDeviceSynchronize();
 
 	cpu_startTime = clock();
 

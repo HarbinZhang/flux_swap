@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <ctime>
+#include <chrono>
 
 #define ARRAY_SIZE 1000
 #define X 1
@@ -98,7 +99,6 @@ __global__ void running(double *g, double *mid_array)
 			}
 		}
 	}
-
 	__syncthreads();
 	mid[index] = arr[2];
 	__syncthreads();
@@ -118,8 +118,12 @@ __global__ void getRowSum(double *g, double *r, double *getSumArray){
 
 	int mid = ARRAY_SIZE/2 * X;
 	if(m == mid && n == mid){
-		printf("mid: %f\n", g[mid * N + mid]);
-		r[1] = g[mid * N + mid];
+		// printf("mid: %f\n", g[mid * N + mid]);
+		r[1] = sdata[j];
+	}
+
+	if(m == 17 && n == 31){
+		r[0] = sdata[j];
 	}
 
 	__syncthreads();
@@ -132,8 +136,8 @@ __global__ void getRowSum(double *g, double *r, double *getSumArray){
 	}
 
 	if(j == 0){
-		printf("sum from thread: %d is : %f \n", blockIdx.x, sdata[0]);
-		getSumArray[i + ARRAY_SIZE * (Y * blockIdx.z + blockIdx.y) ] = sdata[0];
+		printf("sum from block: %d is : %f \n", blockIdx.x, sdata[0]);
+		getSumArray[i + ARRAY_SIZE * (Y * blockIdx.z + blockIdx.y)] = sdata[0];
 	}
 	__syncthreads();
 }
@@ -232,19 +236,11 @@ int main(int argc, char ** argv) {
     	}
     }
 
-    // printf("A[N/2][N/2]: %f 	A[17][31]: %f \n", h_array[N/2*(N+1)],h_array[17*N+31]);
-
     cudaMemcpy(d_array, h_array, ARRAY_BYTES, cudaMemcpyHostToDevice);
 
-    // dim3 dimGrid(2, 2);
-    // dim3 dimBlock(ARRAY_SIZE, ARRAY_SIZE);
-    // init<<<1, dimBlock>>>(d_array);
-    // // init<<<1, ARRAY_SIZE*ARRAY_SIZE>>>(d_array);
-
-    // init<<<dim3(ARRAY_SIZE,X,Y), ARRAY_SIZE>>>(d_array);
-    // cudaDeviceSynchronize();
 
 	cpu_startTime = clock();
+	auto start = std::chrono::system_clock::now();
 
 
 	handle<<<1, 1>>>(d_array, mid_array);
@@ -265,8 +261,10 @@ int main(int argc, char ** argv) {
 
 	
 	cpu_endTime = clock();
+	auto end = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = end-start;
 	cpu_ElapseTime = (cpu_endTime - cpu_startTime);
-	printf("Time using in CPU is : %f\n", cpu_ElapseTime);
+	printf("Time using in CPU is : %f\n", elapsed_seconds);
 
 
     // printf("{ ");
@@ -284,6 +282,7 @@ int main(int argc, char ** argv) {
     cudaFree(d_array);
     cudaFree(r);
     cudaFree(cres);
+    cudaFree(mid_array);
 
 
 	return 0;

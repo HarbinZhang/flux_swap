@@ -3,7 +3,7 @@
 #include <ctime>
 
 #define ARRAY_SIZE 1000
-#define X 1
+#define X 2
 #define Y X
 #define N ARRAY_SIZE*X
 
@@ -65,6 +65,18 @@ __device__ double quick_select(double* input, int p, int r, int k)
     else  return quick_select(input, j + 1, r, k - length);
 }
 
+__device__ double bubble_sort(double *input, int p, int r, int k){
+	for(int i = 0; i < 5; i++){
+		for(int j = i+1; j < 5; j ++){
+			if(input[i] < input[j]){
+				double temp = input[i];
+				input[i] = input[j];
+				input[j] = temp;
+			}
+		}
+	}
+	return input[k];
+}
 
 __global__ void running(double *g)
 {
@@ -80,7 +92,7 @@ __global__ void running(double *g)
 	// if(i == 0 || i == ARRAY_SIZE - 1  || j == 0 || j == ARRAY_SIZE - 1){
 	// if( (y == 0 && i == 0) || ( y == Y-1 && i == ARRAY_SIZE - 1) ||
 	// 	(x == 0 && j == 0) || ( x == X-1 && j == ARRAY_SIZE - 1)){
-	if(m == 0 || m == X*ARRAY_SIZE - 1 || n == 0 || n == Y*ARRAY_SIZE - 1){
+	if(m == 0 || m == N - 1 || n == 0 || n == N - 1){
 
 	}else{
 		arr[0] = g[index];
@@ -89,8 +101,10 @@ __global__ void running(double *g)
 		arr[3] = g[index + ARRAY_SIZE * X];
 		arr[4] = g[index - ARRAY_SIZE * X];
 
-		double temp = quick_select(arr, 0, 4, 2);
+		//double temp = quick_select(arr, 0, 4, 2);
+		double temp = bubble_sort(arr, 0, 4, 2);
 
+		__syncthreads();
 		g[index] = temp;
 	}
 
@@ -105,13 +119,13 @@ __global__ void getSum(double *g, double*r){
 	int i = threadIdx.x;
 	int index = i * ARRAY_SIZE;	
 
-	extern __shared__ float sdata[];
+	__shared__ double sdata[ARRAY_SIZE];
 
 	sdata[i] = g[index];
 
 	__syncthreads();
 
-	for (int s = 1024/2; s > 0; s >>= 1 ){
+	for (int s = 512; s > 0; s >>= 1 ){
 		if(i < s && i + s < ARRAY_SIZE){
 				sdata[i] += sdata[i + s];
 		}
@@ -119,11 +133,11 @@ __global__ void getSum(double *g, double*r){
 	}
 
 	if(i == 0){
-		r[0] = sdata[i];
+		r[blockIdx.y * X + blockIdx.z] = sdata[0];	
+		printf("sum: %f\n", sdata[0]);
 	}
 
 	__syncthreads();
-
 }
 
 
@@ -143,7 +157,7 @@ __global__ void getResult(double *g, double *r){
 
 	if(m == 17 && n == 31){
 		printf("17, 31 : %f\n", g[17*ARRAY_SIZE + 31]);
-		r[2] = g[17 * ARRAY_SIZE + 31];
+		r[0] = g[17 * ARRAY_SIZE + 31];
 	}
 
 	__syncthreads();
@@ -155,9 +169,9 @@ __global__ void getResult(double *g, double *r){
 		__syncthreads();
 	}
 
-
+	__syncthreads();
 	// getSum<<<dim3(1,X,Y), ARRAY_SIZE, ARRAY_SIZE*sizeof(double)>>>(g, r);
-	getSum<<<1, ARRAY_SIZE, ARRAY_SIZE*sizeof(double)>>>(g, r);
+	// getSum<<<1, ARRAY_SIZE>>>(g, r);
 
 	// for (int s = ARRAY_SIZE/2; s > 0; s >>= 1){
 	// 	if(i < s && j == 0){
@@ -166,12 +180,10 @@ __global__ void getResult(double *g, double *r){
 	// 	__syncthreads();
 	// }
 
-	// if(m == 0 && n == 0){
+	//if(m == 0 && n == 0){
 	// 	printf("sum: %f\n", g[0]);
 	// 	r[0] = g[0];
 	// }
-
-
 }
 
 
@@ -183,14 +195,15 @@ __global__ void handle(double *g, double *r)
 
 	
 	for(int i = 0; i < 10; i++){
-		// running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
+		running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
 		__syncthreads();
 	}	
 
-	// running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
+	//running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
 
 	getResult<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, r);
 
+	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(g, r);
 	
 	__syncthreads();
 	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
@@ -216,7 +229,7 @@ int main(int argc, char ** argv) {
     cudaMemset((void *) d_array, 0, ARRAY_BYTES); 
 
     double * r;
-    cudaMalloc((void **) &r, 3 * sizeof(double));
+    cudaMalloc((void **) &r, (2+X*Y) * sizeof(double));
     
 
     for(int i = 0; i < X*ARRAY_SIZE; i++){

@@ -9,24 +9,15 @@
 
 __global__ void init(double *g)
 {
-	// which thread is this?
-	// int i = blockIdx.x * blockDim.x + threadIdx.x; 
 	int i = blockIdx.x;
 	int j = threadIdx.x;
 
 	int m = i + blockIdx.z * ARRAY_SIZE;
 	int n = j + blockIdx.y * ARRAY_SIZE;
 
-
-	// g[i*ARRAY_SIZE + j] = i*ARRAY_SIZE + j;
-	// printf("Hello from sin %d, cos %d, thready %d\n", blockIdx.x, blockIdx.y, blockIdx.z);
-	// printf("hi blockDim %d \t %d \t %d \n", blockDim.x, blockDim.y, blockDim.z);
-	// printf("hi threadIdx %d \t%d \t%d \n", threadIdx.x, threadIdx.y, threadIdx.z);
-	// printf("hi m: %d   n: %d  index: %d  value:%f\n", m, n, m * ARRAY_SIZE * X + n, sinf(m*m + n)*sinf(m*m + n) + cosf(m - n));
 	g[m * ARRAY_SIZE * X + n] = sinf(m*m + n)*sinf(m*m + n) + cosf(m - n);
 	// g[m * ARRAY_SIZE * X + n] = n*1.0;
 	__syncthreads();
-	// each thread to increment consecutive elements, wrapping at ARRAY_SIZE
 }
 
 
@@ -114,6 +105,39 @@ __global__ void running(double *g)
 }
 
 
+__global__ void getRowSum(double *g, double *r, double *getSumArray){
+	int i = blockIdx.x;
+	int j = threadIdx.x;
+	int m = i + blockIdx.z * ARRAY_SIZE;
+	int n = j + blockIdx.y * ARRAY_SIZE;
+	int index = m * ARRAY_SIZE * X + n;
+	__shared__ double sdata[ARRAY_SIZE];
+
+	sdata[j] = g[index];
+	__syncthreads();
+
+	int mid = ARRAY_SIZE/2 * X;
+	if(m == mid && n == mid){
+		printf("mid: %f\n", g[mid * N + mid]);
+		r[1] = g[mid * N + mid];
+	}
+
+	__syncthreads();
+
+	for (int s = 1024/2; s > 0; s >>= 1 ){
+		if(j < s && j + s < ARRAY_SIZE){
+			sdata[j] += sdata[j + s];
+		}
+		__syncthreads();
+	}
+
+	if(j == 0){
+		printf("sum from thread: %d is : %f \n", blockIdx.x, sdata[0]);
+		getSumArray[i + ARRAY_SIZE * (Y * blockIdx.z + blockIdx.y) ] = sdata[0];
+	}
+	__syncthreads();
+}
+
 
 __global__ void getSum(double *getSumArray, double*r){
 	int i = threadIdx.x;
@@ -139,44 +163,6 @@ __global__ void getSum(double *getSumArray, double*r){
 	__syncthreads();
 }
 
-
-__global__ void getRowSum(double *g, double *r, double *getSumArray){
-	int i = blockIdx.x;
-	int j = threadIdx.x;
-	int m = i + blockIdx.z * ARRAY_SIZE;
-	int n = j + blockIdx.y * ARRAY_SIZE;
-	int index = m * ARRAY_SIZE * X + n;
-	__shared__ double sdata[ARRAY_SIZE];
-
-	sdata[j] = g[index];
-	//__syncthreads();
-
-	int mid = ARRAY_SIZE/2 * X;
-	if(m == mid && n == mid){
-		printf("mid: %f\n", g[mid * N + mid]);
-		r[1] = g[mid * N + mid];
-	}
-
-	// if(m == 17 && n == 31){
-	// 	printf("17, 31 : %f\n", g[17*N + 31]);
-	// 	r[0] = g[17 * N + 31];
-	// }
-
-	__syncthreads();
-
-	for (int s = 1024/2; s > 0; s >>= 1 ){
-		if(j < s && j + s < ARRAY_SIZE){
-			sdata[j] += sdata[j + s];
-		}
-		__syncthreads();
-	}
-
-	if(j == 0){
-		printf("sum from thread: %d is : %f \n", threadIdx.x, sdata[0]);
-		getSumArray[i + ARRAY_SIZE * (Y * blockIdx.z + blockIdx.y) ] = sdata[0];
-	}
-	__syncthreads();
-}
 
 __global__ void getRes(double *r, double *cres){
 	__shared__ double sdata[X*Y];

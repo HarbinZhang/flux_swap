@@ -3,7 +3,8 @@ git:
 	git commit -m "auto"
 	git push
 
-
+sta:
+	qstat -u haibinzh
 main:
 	nvcc -arch=sm_35 -o main.out main.cu -rdc=true -lcudadevrt
 

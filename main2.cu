@@ -101,6 +101,31 @@ __global__ void running(double *g)
 
 
 
+__global__ void getSum(double *g, double*r){
+	int i = threadIdx.x;
+	int index = i * ARRAY_SIZE;	
+
+	extern __shared__ float sdata[];
+
+	sdata[i] = g[index];
+
+	__syncthreads();
+
+	for (int s = 1024/2; s > 0; s >>= 1 ){
+		if(i < s && i + s < ARRAY_SIZE){
+				sdata[i] += sdata[i + s];
+		}
+		__syncthreads();
+	}
+
+	if(i == 0){
+		r[0] = sdata[i];
+	}
+
+	__syncthreads();
+
+}
+
 
 __global__ void getResult(double *g, double *r){
 	int i = blockIdx.x;
@@ -123,24 +148,28 @@ __global__ void getResult(double *g, double *r){
 
 	__syncthreads();
 
-	for (int s = ARRAY_SIZE/2; s > 0; s >>= 1 ){
-		if(j < s){
+	for (int s = 1024/2; s > 0; s >>= 1 ){
+		if(j < s && j + s < ARRAY_SIZE){
 			g[index] += g[index + s];
 		}
 		__syncthreads();
 	}
 
-	for (int s = ARRAY_SIZE/2; s > 0; s >>= 1){
-		if(i < s && j == 0){
-			g[index] += g[index + s*ARRAY_SIZE];
-		}
-		__syncthreads();
-	}
 
-	if(m == 0 && n == 0){
-		printf("sum: %f\n", g[0]);
-		r[0] = g[0];
-	}
+	// getSum<<<dim3(1,X,Y), ARRAY_SIZE, ARRAY_SIZE*sizeof(double)>>>(g, r);
+	getSum<<<1, ARRAY_SIZE, ARRAY_SIZE*sizeof(double)>>>(g, r);
+
+	// for (int s = ARRAY_SIZE/2; s > 0; s >>= 1){
+	// 	if(i < s && j == 0){
+	// 		g[index] += g[index + s*ARRAY_SIZE];
+	// 	}
+	// 	__syncthreads();
+	// }
+
+	// if(m == 0 && n == 0){
+	// 	printf("sum: %f\n", g[0]);
+	// 	r[0] = g[0];
+	// }
 
 
 }

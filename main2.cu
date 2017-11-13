@@ -80,7 +80,6 @@ __device__ double bubble_sort(double *input, int p, int r, int k){
 
 __global__ void running(double *g)
 {
-
 	// buffer
 	double arr[5];
 	int i = blockIdx.x;
@@ -89,40 +88,29 @@ __global__ void running(double *g)
 	int n = j + blockIdx.y * ARRAY_SIZE;
 	int index = m * ARRAY_SIZE * X + n;
 
-	// if(i == 0 || i == ARRAY_SIZE - 1  || j == 0 || j == ARRAY_SIZE - 1){
-	// if( (y == 0 && i == 0) || ( y == Y-1 && i == ARRAY_SIZE - 1) ||
-	// 	(x == 0 && j == 0) || ( x == X-1 && j == ARRAY_SIZE - 1)){
-	if(m == 0 || m == N - 1 || n == 0 || n == N - 1){
+	arr[2] = g[index];
+	arr[1] = g[index + 1];
+	arr[0] = g[index - 1];
+	arr[3] = g[index + ARRAY_SIZE * X];
+	arr[4] = g[index - ARRAY_SIZE * X];
 
-	}else{
-		arr[0] = g[index];
-		arr[1] = g[index + 1];
-		arr[2] = g[index - 1];
-		arr[3] = g[index + ARRAY_SIZE * X];
-		arr[4] = g[index - ARRAY_SIZE * X];
+	__syncthreads();
 
-		//double temp = quick_select(arr, 0, 4, 2);
-		// double temp = bubble_sort(arr, 0, 4, 2);
-		__syncthreads();
-		
-		for(int i = 0; i < 4; i++){
-			for(int j = 0; j < 4 - i; j ++){
-				if(arr[j + i] < arr[j]){
+	if(m != 0 && m != N - 1 && n != 0 && n != N - 1){
+		for(int i = 0; i < 5; i++){
+			for(int j = 0; j < 5 - i; j++){
+				if(arr[j+1] < arr[j]){
 					double temp = arr[j];
 					arr[j] = arr[j+1];
 					arr[j+1] = temp;
 				}
 			}
 		}
-		
-
-		__syncthreads();
-		g[index] = arr[2];
 	}
 
-
 	__syncthreads();
-	// get mediean
+	g[index] = arr[2];
+	__syncthreads();
 }
 
 

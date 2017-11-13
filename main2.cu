@@ -100,7 +100,7 @@ __global__ void running(double *g, double *mid_array)
 		}
 	}
 	__syncthreads();
-	mid[index] = arr[2];
+	mid_array[index] = arr[2];
 	__syncthreads();
 }
 
@@ -126,6 +126,20 @@ __global__ void getRowSum(double *g, double *r, double *getSumArray){
 		r[0] = sdata[j];
 	}
 
+	if(m == 999 && n == 999){
+		printf(" 999 999 : %f \n", sdata[j]);
+	}
+	if(m == 500 && n == 999){
+		printf(" 500 999 : %f \n", sdata[j]);
+	}
+
+	if(m == 999 && n == 500){
+		printf(" 999 500 : %f \n", sdata[j]);
+	}
+
+	if(m == 501 && n == 0){
+		printf(" 501 0 : %f \n", sdata[j]);
+	}
 	__syncthreads();
 
 	for (int s = 1024/2; s > 0; s >>= 1 ){
@@ -191,7 +205,7 @@ __global__ void handle(double *g, double *mid_array)
 {
 	for(int i = 0; i < 10; i++){
 		 running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, mid_array);
-		// __syncthreads();
+		__syncthreads();
 	}	
 
 	//running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
@@ -204,9 +218,7 @@ int main(int argc, char ** argv) {
     // declare and allocate host memory
     double h_array[N*N];
     const int ARRAY_BYTES = N*N*sizeof(double);
- 
-    clock_t cpu_startTime, cpu_endTime;
-    double cpu_ElapseTime=0;
+
 	
 
     printf("The N is : %d\n",N);
@@ -239,7 +251,7 @@ int main(int argc, char ** argv) {
     cudaMemcpy(d_array, h_array, ARRAY_BYTES, cudaMemcpyHostToDevice);
 
 
-	cpu_startTime = clock();
+
 	auto start = std::chrono::system_clock::now();
 
 
@@ -260,10 +272,9 @@ int main(int argc, char ** argv) {
     cudaMemcpy(res, cres, 3*sizeof(double), cudaMemcpyDeviceToHost);
 
 	
-	cpu_endTime = clock();
+
 	auto end = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end-start;
-	cpu_ElapseTime = (cpu_endTime - cpu_startTime);
 	printf("Time using in CPU is : %f\n", elapsed_seconds);
 
 
@@ -277,6 +288,8 @@ int main(int argc, char ** argv) {
     // printf("}\n");
 
     printf("Sum From CPU: %f \n", res[2]);
+    printf("A[17][31] :  %f \n", res[0]);
+    printf("A[mid][mid]: %f \n", res[1]);
 
 
     cudaFree(d_array);

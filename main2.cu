@@ -133,7 +133,7 @@ __global__ void getSum(double *getSumArray, double*r){
 	}
 
 	if(i == 0){
-		r[blockIdx.y * X + blockIdx.z] = sdata[0];	
+		r[2 + blockIdx.y * X + blockIdx.z] = sdata[0];	
 		printf("sum: %f\n", sdata[0]);
 	}
 
@@ -179,7 +179,7 @@ __global__ void getResult(double *g, double *r, double *getSumArray){
 	__syncthreads();
 }
 
-__global__ void getRes(double *r, double *cres){
+__global__ void getRes(double *r, double *getSumArray, double *cres){
 	__shared__ double sdata[X*Y];
 	int i = threadIdx.x;
 	sdata[i] = r[i+2];
@@ -193,6 +193,7 @@ __global__ void getRes(double *r, double *cres){
 	}
 	if(i == 0){
 		cres[2] = sdata[0];
+		cres[1] = 2.3;
 
 	}
 	__syncthreads();
@@ -267,7 +268,7 @@ int main(int argc, char ** argv) {
 	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(getSumArray, r);
 	cudaDeviceSynchronize();
 
-	getRes<<<1, X*Y>>>(r, cres);
+	getRes<<<1, X*Y>>>(r, getSumArray, cres);
 	cudaDeviceSynchronize();
 
 	double res[3];

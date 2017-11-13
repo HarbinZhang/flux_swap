@@ -69,7 +69,7 @@ __device__ double bubble_sort(double *input, int p, int r, int k){
 	return input[k];
 }
 
-__global__ void running(double *g)
+__global__ void running(double *g, double *mid_array)
 {
 	// buffer
 	double arr[5];
@@ -80,14 +80,14 @@ __global__ void running(double *g)
 	int index = m * ARRAY_SIZE * X + n;
 
 	arr[2] = g[index];
-	arr[1] = g[index + 1];
-	arr[0] = g[index - 1];
-	arr[3] = g[index + ARRAY_SIZE * X];
-	arr[4] = g[index - ARRAY_SIZE * X];
 
 	__syncthreads();
 
 	if(m != 0 && m != N - 1 && n != 0 && n != N - 1){
+		arr[1] = g[index + 1];
+		arr[0] = g[index - 1];
+		arr[3] = g[index + ARRAY_SIZE * X];
+		arr[4] = g[index - ARRAY_SIZE * X];
 		for(int i = 0; i < 5; i++){
 			for(int j = 0; j < 5 - i; j++){
 				if(arr[j+1] < arr[j]){
@@ -100,7 +100,7 @@ __global__ void running(double *g)
 	}
 
 	__syncthreads();
-	g[index] = arr[2];
+	mid[index] = arr[2];
 	__syncthreads();
 }
 
@@ -183,10 +183,10 @@ __global__ void getRes(double *r, double *cres){
 	__syncthreads();
 }
 
-__global__ void handle(double *g)
+__global__ void handle(double *g, double *mid_array)
 {
 	for(int i = 0; i < 10; i++){
-		 running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
+		 running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, mid_array);
 		// __syncthreads();
 	}	
 
@@ -211,6 +211,10 @@ int main(int argc, char ** argv) {
     double * d_array;
     cudaMalloc((void **) &d_array, ARRAY_BYTES);
     cudaMemset((void *) d_array, 0, ARRAY_BYTES); 
+
+    double * mid_array;
+    cudaMalloc((void **) &mid_array, ARRAY_BYTES);
+    cudaMemset((void *) mid_array, 0, ARRAY_BYTES); 
 
     double * r;
     cudaMalloc((void **) &r, (2+X*Y) * sizeof(double));
@@ -243,10 +247,10 @@ int main(int argc, char ** argv) {
 	cpu_startTime = clock();
 
 
-	handle<<<1, 1>>>(d_array);
+	handle<<<1, 1>>>(d_array, mid_array);
 	cudaDeviceSynchronize();
 
-	getRowSum<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(d_array, r, getSumArray);
+	getRowSum<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(mid_array, r, getSumArray);
 	cudaDeviceSynchronize();
 
 	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(getSumArray, r);

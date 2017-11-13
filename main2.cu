@@ -154,7 +154,7 @@ __global__ void handle(double *g, double *r)
 
 	
 	for(int i = 0; i < 10; i++){
-		running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
+		// running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
 		__syncthreads();
 	}	
 
@@ -192,7 +192,7 @@ int main(int argc, char ** argv) {
 
     for(int i = 0; i < X*ARRAY_SIZE; i++){
     	for(int j = 0; j < Y*ARRAY_SIZE; j++){
-    		h[i*N + j] = sin(x*x + j) * sin(x*x + j) + cos(i - j);
+    		h_array[i*N + j] = sin(i*i + j) * sin(i*i + j) + cos(i - j);
     	}
     }
 

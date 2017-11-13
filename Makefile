@@ -9,7 +9,7 @@ main:
 	nvcc -arch=sm_35 -o main.out main.cu -rdc=true -lcudadevrt
 
 main2:
-	nvcc -arch=sm_35 -o main.out main2.cu -rdc=true -lcudadevrt	
+	nvcc -arch=sm_35 -o main.out main2.cu -rdc=true -lcudadevrt -std=c++11
 
 main4:
 	nvcc -arch=sm_35 -o main.out main4.cu -rdc=true -lcudadevrt

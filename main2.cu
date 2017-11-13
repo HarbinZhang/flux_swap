@@ -186,7 +186,7 @@ __global__ void getSum(double *getSumArray, double*r){
 __global__ void getRes(double *r, double *cres){
 	__shared__ double sdata[X*Y];
 	int i = threadIdx.x;
-	sdata[i] = r[i+2];
+	sdata[i] = r[i];
 	__syncthreads();
 
 	for(int s = X*Y/2; s > 0; s >>=1){
@@ -196,7 +196,7 @@ __global__ void getRes(double *r, double *cres){
 		__syncthreads();
 	}
 	if(i == 0){
-		cres[2] = sdata[0];
+		cres = &sdata[0];
 
 	}
 	__syncthreads();

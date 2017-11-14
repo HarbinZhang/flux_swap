@@ -202,10 +202,22 @@ __global__ void getRes(double *r, double *cres){
 	__syncthreads();
 }
 
+__global__ void copyback(double *mid_array, double*g){
+	int i = blockIdx.x;
+	int j = threadIdx.x;
+	int m = i + blockIdx.z * ARRAY_SIZE;
+	int n = j + blockIdx.y * ARRAY_SIZE;
+	int index = m * ARRAY_SIZE * X + n;
+
+	g[index] = mid_array[index];
+	__syncthreads();	
+}
+
 __global__ void handle(double *g, double *mid_array)
 {
 	for(int i = 0; i < 10; i++){
 		 running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, mid_array);
+		 copyback<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(mid_array, g);
 		__syncthreads();
 	}	
 

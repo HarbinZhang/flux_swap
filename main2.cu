@@ -118,29 +118,29 @@ __global__ void getRowSum(double *g, double *r, double *getSumArray){
 
 	int mid = ARRAY_SIZE/2 * X;
 	if(m == mid && n == mid){
-		printf("mid: %f\n", sdata[j]);
 		r[1] = sdata[j];
+		printf("mid: %f\n", r[1]);
 	}
 
 	if(m == 17 && n == 31){
-		printf("17: %f\n", sdata[mid * N + mid]);
 		r[0] = sdata[j];
+		printf("17: %f\n", r[0]);
 	}
 
-	if(m == 999 && n == 999){
-		printf(" 999 999 : %f \n", sdata[j]);
-	}
-	if(m == 500 && n == 999){
-		printf(" 500 999 : %f \n", sdata[j]);
-	}
+	// if(m == 999 && n == 999){
+	// 	printf(" 999 999 : %f \n", sdata[j]);
+	// }
+	// if(m == 500 && n == 999){
+	// 	printf(" 500 999 : %f \n", sdata[j]);
+	// }
 
-	if(m == 999 && n == 500){
-		printf(" 999 500 : %f \n", sdata[j]);
-	}
+	// if(m == 999 && n == 500){
+	// 	printf(" 999 500 : %f \n", sdata[j]);
+	// }
 
-	if(m == 501 && n == 0){
-		printf(" 501 0 : %f \n", sdata[j]);
-	}
+	// if(m == 501 && n == 0){
+	// 	printf(" 501 0 : %f \n", sdata[j]);
+	// }
 	__syncthreads();
 
 	for (int s = 1024/2; s > 0; s >>= 1 ){
@@ -217,9 +217,9 @@ __global__ void handle(double *g, double *mid_array)
 {
 	for(int i = 0; i < 10; i++){
 		running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, mid_array);
-		double **temp = &g;
+		double *temp = g;
 		g = mid_array;
-		mid_array = g;
+		mid_array = temp;
 		// __syncthreads();
 		// copyback<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(mid_array, g);
 		// __syncthreads();

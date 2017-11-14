@@ -17,7 +17,6 @@ __global__ void init(double *g)
 	int n = j + blockIdx.y * ARRAY_SIZE;
 
 	g[m * ARRAY_SIZE * X + n] = sinf(m*m + n)*sinf(m*m + n) + cosf(m - n);
-	// g[m * ARRAY_SIZE * X + n] = n*1.0;
 	__syncthreads();
 }
 
@@ -90,16 +89,16 @@ __global__ void running(double *g, double *mid_array)
 		arr[3] = g[index + ARRAY_SIZE * X];
 		arr[4] = g[index - ARRAY_SIZE * X];
 
-		arr[2] = quick_select(arr, 0, 4, 2);
-		// for(int i = 0; i < 5; i++){
-		// 	for(int j = 0; j < 5 - i; j++){
-		// 		if(arr[j+1] < arr[j]){
-		// 			double temp = arr[j];
-		// 			arr[j] = arr[j+1];
-		// 			arr[j+1] = temp;
-		// 		}
-		// 	}
-		// }
+		// arr[2] = quick_select(arr, 0, 4, 2);
+		for(int i = 0; i < 5; i++){
+			for(int j = 0; j < 5 - i; j++){
+				if(arr[j+1] < arr[j]){
+					double temp = arr[j];
+					arr[j] = arr[j+1];
+					arr[j+1] = temp;
+				}
+			}
+		}
 	}
 	__syncthreads();
 	mid_array[index] = arr[2];
@@ -225,10 +224,6 @@ int main(int argc, char ** argv) {
     double * getSumArray;
     cudaMalloc((void **) &getSumArray, X * Y * ARRAY_SIZE * sizeof(double));
     
-    double * cres;
-    cudaMalloc((void **) &cres, 3 * sizeof(double));
-  
-
     for(int i = 0; i < X*ARRAY_SIZE; i++){
     	for(int j = 0; j < Y*ARRAY_SIZE; j++){
     		h_array[i*N + j] = sin(i*i + j) * sin(i*i + j) + cos(i - j);

@@ -4,7 +4,7 @@
 #include <chrono>
 
 #define ARRAY_SIZE 1000
-#define X 1
+#define X 4
 #define Y X
 #define N ARRAY_SIZE*X
 
@@ -277,13 +277,13 @@ int main(int argc, char ** argv) {
 	handle<<<1, 1>>>(d_array, mid_array);
 	cudaDeviceSynchronize();
 
-	getRowSum<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(mid_array, r, getSumArray);
+	getRowSum<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(d_array, r, getSumArray);
 	cudaDeviceSynchronize();
 
 	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(getSumArray, r);
 	cudaDeviceSynchronize();
 
-	getRes<<<1, X*Y>>>(csum, cres);
+	getRes<<<1, X*Y>>>(r, cres);
 	cudaDeviceSynchronize();
 
 	double res[3];

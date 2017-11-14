@@ -89,15 +89,17 @@ __global__ void running(double *g, double *mid_array)
 		arr[0] = g[index - 1];
 		arr[3] = g[index + ARRAY_SIZE * X];
 		arr[4] = g[index - ARRAY_SIZE * X];
-		for(int i = 0; i < 5; i++){
-			for(int j = 0; j < 5 - i; j++){
-				if(arr[j+1] < arr[j]){
-					double temp = arr[j];
-					arr[j] = arr[j+1];
-					arr[j+1] = temp;
-				}
-			}
-		}
+
+		arr[2] = quick_select(arr, 0, 4, 2);
+		// for(int i = 0; i < 5; i++){
+		// 	for(int j = 0; j < 5 - i; j++){
+		// 		if(arr[j+1] < arr[j]){
+		// 			double temp = arr[j];
+		// 			arr[j] = arr[j+1];
+		// 			arr[j+1] = temp;
+		// 		}
+		// 	}
+		// }
 	}
 	__syncthreads();
 	mid_array[index] = arr[2];
@@ -127,20 +129,6 @@ __global__ void getRowSum(double *g, double *r, double *getSumArray){
 		printf("17 31: %f\n", r[0]);
 	}
 
-	// if(m == 999 && n == 999){
-	// 	printf(" 999 999 : %f \n", sdata[j]);
-	// }
-	// if(m == 500 && n == 999){
-	// 	printf(" 500 999 : %f \n", sdata[j]);
-	// }
-
-	// if(m == 999 && n == 500){
-	// 	printf(" 999 500 : %f \n", sdata[j]);
-	// }
-
-	// if(m == 501 && n == 0){
-	// 	printf(" 501 0 : %f \n", sdata[j]);
-	// }
 	__syncthreads();
 
 	for (int s = 1024/2; s > 0; s >>= 1 ){
@@ -151,7 +139,6 @@ __global__ void getRowSum(double *g, double *r, double *getSumArray){
 	}
 
 	if(j == 0){
-		// printf("sum from block: %d is : %f \n", blockIdx.x, sdata[0]);
 		getSumArray[i + ARRAY_SIZE * (Y * blockIdx.z + blockIdx.y)] = sdata[0];
 	}
 	__syncthreads();
@@ -183,7 +170,7 @@ __global__ void getSum(double *getSumArray, double *csum){
 }
 
 
-__global__ void getRes(double *r, double *cres){
+__global__ void getRes(double *r){
 	__shared__ double sdata[X*Y];
 	int i = threadIdx.x;
 	sdata[i] = r[2+i];
@@ -196,23 +183,12 @@ __global__ void getRes(double *r, double *cres){
 		__syncthreads();
 	}
 	if(i == 0){
-		*cres = sdata[0];
 		r[2] = sdata[0];
 
 	}
 	__syncthreads();
 }
 
-__global__ void copyback(double *mid_array, double*g){
-	int i = blockIdx.x;
-	int j = threadIdx.x;
-	int m = i + blockIdx.z * ARRAY_SIZE;
-	int n = j + blockIdx.y * ARRAY_SIZE;
-	int index = m * ARRAY_SIZE * X + n;
-
-	g[index] = mid_array[index];
-	__syncthreads();	
-}
 
 __global__ void handle(double *g, double *mid_array)
 {
@@ -221,9 +197,6 @@ __global__ void handle(double *g, double *mid_array)
 		double *temp = g;
 		g = mid_array;
 		mid_array = temp;
-		// __syncthreads();
-		// copyback<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(mid_array, g);
-		// __syncthreads();
 	}	
 }
 
@@ -234,8 +207,6 @@ int main(int argc, char ** argv) {
     // declare and allocate host memory
     double h_array[N*N];
     const int ARRAY_BYTES = N*N*sizeof(double);
-
-	
 
     printf("The N is : %d\n",N);
 
@@ -250,9 +221,6 @@ int main(int argc, char ** argv) {
 
     double * r;
     cudaMalloc((void **) &r, (2+X*Y) * sizeof(double));
-
-    // double * csum;
-    // cudaMalloc((void **) &r, (2+X*Y) * sizeof(double));
 
     double * getSumArray;
     cudaMalloc((void **) &getSumArray, X * Y * ARRAY_SIZE * sizeof(double));
@@ -283,29 +251,17 @@ int main(int argc, char ** argv) {
 	getSum<<<dim3(1,X,Y), ARRAY_SIZE>>>(getSumArray, r);
 	cudaDeviceSynchronize();
 
-	getRes<<<1, X*Y>>>(r, cres);
+	getRes<<<1, X*Y>>>(r);
 	cudaDeviceSynchronize();
 
 	double res[3];
-	double sumRes;
-    cudaMemcpy(&sumRes, cres, sizeof(double), cudaMemcpyDeviceToHost);
     cudaMemcpy(res, r, 3*sizeof(double), cudaMemcpyDeviceToHost);
 
-	
 
 	auto end = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = end-start;
 	printf("Time using in CPU is : %f\n", elapsed_seconds);
 
-
-    // printf("{ ");
-    // for (int i = 0; i < 10; i++)  {
-    //	for(int j = 0; j < 10; j++)
-    //		{ printf("%f ", h_array[i*ARRAY_SIZE +j]); }
-    //	printf("\n");
-    // }
-   
-    // printf("}\n");
 
     printf("Sum From CPU: %f \n", res[2]);
     printf("A[17][31] :  %f \n", res[0]);

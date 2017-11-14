@@ -151,7 +151,7 @@ __global__ void getRowSum(double *g, double *r, double *getSumArray){
 	}
 
 	if(j == 0){
-		printf("sum from block: %d is : %f \n", blockIdx.x, sdata[0]);
+		// printf("sum from block: %d is : %f \n", blockIdx.x, sdata[0]);
 		getSumArray[i + ARRAY_SIZE * (Y * blockIdx.z + blockIdx.y)] = sdata[0];
 	}
 	__syncthreads();
@@ -196,7 +196,7 @@ __global__ void getRes(double *r, double *cres){
 		__syncthreads();
 	}
 	if(i == 0){
-		cres = &sdata[0];
+		*cres = sdata[0];
 
 	}
 	__syncthreads();
@@ -216,12 +216,14 @@ __global__ void copyback(double *mid_array, double*g){
 __global__ void handle(double *g, double *mid_array)
 {
 	for(int i = 0; i < 10; i++){
-		 running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, mid_array);
-		 copyback<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(mid_array, g);
-		__syncthreads();
+		running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g, mid_array);
+		double **temp = &g;
+		g = mid_array;
+		mid_array = g;
+		// __syncthreads();
+		// copyback<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(mid_array, g);
+		// __syncthreads();
 	}	
-
-	//running<<<dim3(ARRAY_SIZE, X, Y), ARRAY_SIZE>>>(g);
 }
 
 
